@@ -38,56 +38,53 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4.0),
-      child: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            // TODO Implement all events that lasts longer than a day with correct starting and ending times
+    return SingleChildScrollView(
+      controller: _scrollController,
+      child: Column(
+        children: [
+          // TODO Implement all events that lasts longer than a day with correct starting and ending times
 
-            // TODO Implement all events that lasts a day and have a start and end time
-            GestureDetector(
-              // change height of hourHeight when pinching the screen
-              onScaleUpdate: (details) {
-                // Smoother scaling with a more responsive and immediate damping effect
-                double adjustedScale = 1 + (details.scale - 1) * scaleDamping;
+          // TODO Implement all events that lasts a day and have a start and end time
+          GestureDetector(
+            // change height of hourHeight when pinching the screen
+            onScaleUpdate: (details) {
+              // Smoother scaling with a more responsive and immediate damping effect
+              double adjustedScale = 1 + (details.scale - 1) * scaleDamping;
 
-                // Neue Höhe mit Dämpfung berechnen und begrenzen
-                hourHeight = (hourHeight * adjustedScale).clamp(50.0, 150.0);
-                setState(() {});
-              },
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: CnCalendarWeekTimeline(hourHeight: hourHeight),
-                  ),
-                  ...List.generate(
-                    7,
-                    (index) {
-                      List<CnCalendarEntry> entriesForDay = widget.calendarEntries
-                          .where(
-                            (entry) =>
-                                entry.dateFrom.isSameDay(widget.selectedWeek.add(Duration(days: index))) &&
-                                !entry.isFullDay,
-                          )
-                          .toList();
+              // Neue Höhe mit Dämpfung berechnen und begrenzen
+              hourHeight = (hourHeight * adjustedScale).clamp(50.0, 150.0);
+              setState(() {});
+            },
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Expanded(
+                  child: CnCalendarWeekTimeline(hourHeight: hourHeight),
+                ),
+                ...List.generate(
+                  7,
+                  (index) {
+                    List<CnCalendarEntry> entriesForDay = widget.calendarEntries
+                        .where(
+                          (entry) =>
+                              entry.dateFrom.isSameDay(widget.selectedWeek.add(Duration(days: index))) &&
+                              !entry.isFullDay,
+                        )
+                        .toList();
 
-                      return Expanded(
-                        child: CnCalendarWeekDayEntries(
-                          hourHeight: hourHeight,
-                          calendarEntries: entriesForDay,
-                          onEntryTapped: widget.onEntryTapped,
-                        ),
-                      );
-                    },
-                  ),
-                ],
-              ),
+                    return Expanded(
+                      child: CnCalendarWeekDayEntries(
+                        hourHeight: hourHeight,
+                        calendarEntries: entriesForDay,
+                        onEntryTapped: widget.onEntryTapped,
+                      ),
+                    );
+                  },
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }

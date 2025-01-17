@@ -38,7 +38,7 @@ class CnCalendarWeekTimeline extends StatelessWidget {
                     ),
                     Container(
                       height: 0.1,
-                      color: decoration.timelineLinesColor,
+                      color: Colors.grey,
                     ),
                   ],
                 ),
