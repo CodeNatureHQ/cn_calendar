@@ -59,7 +59,6 @@ class _CnCalendarHeaderState extends State<CnCalendarHeader> {
       padding: EdgeInsets.only(
         left: decoration.horizontalHeaderPadding,
         right: decoration.horizontalHeaderPadding,
-        bottom: 8,
       ),
       decoration: BoxDecoration(
         color: decoration.headerBackgroundColor,
