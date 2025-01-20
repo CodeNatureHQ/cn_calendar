@@ -4,8 +4,8 @@ import 'package:cn_calendar/views/day/widgets/cn_calendar_day_timeline.dart';
 import 'package:cn_calendar/widgets/cn_calendar_full_day_entry_card.dart';
 import 'package:flutter/material.dart';
 
-class CnCalendarDayEntriesGrid extends StatefulWidget {
-  const CnCalendarDayEntriesGrid({
+class CnCalendarDayGrid extends StatefulWidget {
+  const CnCalendarDayGrid({
     super.key,
     required this.selectedDay,
     required this.calendarEntries,
@@ -17,10 +17,10 @@ class CnCalendarDayEntriesGrid extends StatefulWidget {
   final Function(CnCalendarEntry entry)? onEntryTapped;
 
   @override
-  State<CnCalendarDayEntriesGrid> createState() => _CnCalendarDayEntriesGridState();
+  State<CnCalendarDayGrid> createState() => _CnCalendarDayGridState();
 }
 
-class _CnCalendarDayEntriesGridState extends State<CnCalendarDayEntriesGrid> {
+class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
   ScrollController _scrollController = ScrollController();
   double hourHeight = 70;
 

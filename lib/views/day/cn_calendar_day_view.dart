@@ -1,6 +1,6 @@
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/provider/cn_provider.dart';
-import 'package:cn_calendar/views/day/widgets/cn_calendar_day_entries_grid.dart';
+import 'package:cn_calendar/views/day/widgets/cn_calendar_day_grid.dart';
 import 'package:flutter/material.dart';
 
 class CnCalendarDayView extends StatelessWidget {
@@ -29,7 +29,7 @@ class CnCalendarDayView extends StatelessWidget {
     final decoration = CnProvider.of(context).decoration;
     return Container(
       color: decoration.backgroundColor,
-      child: CnCalendarDayEntriesGrid(
+      child: CnCalendarDayGrid(
         selectedDay: selectedDay,
         calendarEntries: calendarEntries,
         onEntryTapped: onEntryTapped,
