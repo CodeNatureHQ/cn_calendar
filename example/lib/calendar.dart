@@ -1,6 +1,7 @@
 import 'package:cn_calendar/cn_calendar.dart';
 import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
+import 'package:cn_calendar/models/cn_calendar_view.dart';
 import 'package:cn_calendar/models/cn_decoration.dart';
 import 'package:flutter/material.dart';
 
@@ -14,6 +15,7 @@ class Calendar extends StatelessWidget {
         child: CnCalendar(
           selectedDate: DateTime.now().startOfDay,
           onDateChanged: (date, view) {},
+          initialView: CnCalendarView.day,
           decoration: CnDecoration(
             backgroundColor: Color(0xFFEDEDE9),
             headerBackgroundColor: Color(0xFF119589),
@@ -30,12 +32,12 @@ class Calendar extends StatelessWidget {
           ),
           calendarEntries: [
             CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 3)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
-              isFullDay: false,
-            ),
+                id: '0',
+                title: 'Test',
+                dateFrom: DateTime.now().startOfDay.add(Duration(hours: 3)),
+                dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
+                isFullDay: false,
+                color: Colors.purple),
             CnCalendarEntry(
               id: '0',
               title: 'Test',

@@ -51,34 +51,25 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
     // Sort by dateFrom
     entryPositions.sort((a, b) => a.entry.dateFrom.compareTo(b.entry.dateFrom));
 
-    for (int i = 0; i < entryPositions.length; i++) {
-      if (i == 0) continue;
-
-      final entryA = entryPositions[i - 1].entry;
-      final entryB = entryPositions[i].entry;
-
-      if (entryB.dateFrom.difference(entryA.dateFrom).inMinutes < 30) {
-        entryPositions[i].halvedCount++;
-        continue;
-      } else {
-        entryPositions[i].intendCount++;
-        continue;
+    // Group entries into columns
+    List<List<CnCalendarEntryPosition>> columns = [];
+    for (var entry in entryPositions) {
+      bool placed = false;
+      for (var column in columns) {
+        if (!_overlapsWithColumn(entry, column)) {
+          column.add(entry);
+          placed = true;
+          break;
+        }
+      }
+      if (!placed) {
+        columns.add([entry]);
       }
     }
-    // Sort by most halvedCount and then by dateFrom
-    entryPositions.sort((a, b) => a.halvedCount.compareTo(b.halvedCount));
 
-    for (int i = 0; i < entryPositions.length; i++) {
-      if (i == 0) continue;
+    // Calculate the maximum number of columns to determine the width of each entry
+    int maxColumns = columns.length;
 
-      final entryA = entryPositions[i - 1].entry;
-      final entryB = entryPositions[i].entry;
-
-      // if endtime is overlapping with next start time
-      if (entryA.dateUntil.isAfter(entryB.dateFrom)) {
-        entryPositions[i].intendCount++;
-      }
-    }
     return entryPositions.map((entry) {
       final startHour = entry.entry.dateFrom.hour;
       final startMinute = entry.entry.dateFrom.minute;
@@ -88,11 +79,22 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
       final top = startHour * widget.hourHeight + (startMinute / 60) * widget.hourHeight;
       final height = (endHour - startHour) * widget.hourHeight + (endMinute - startMinute) / 60 * widget.hourHeight;
 
-      final entryWidth = (width / entry.halvedCount) - (8 * entry.intendCount);
+      // Find the column index for this entry
+      int columnIndex = 0;
+      for (int i = 0; i < columns.length; i++) {
+        if (columns[i].contains(entry)) {
+          columnIndex = i;
+          break;
+        }
+      }
+
+      // Calculate the width and left position based on the column index
+      final entryWidth = width / maxColumns;
+      final left = columnIndex * entryWidth;
 
       return Positioned(
         top: top,
-        right: 0,
+        left: left,
         height: height,
         child: Padding(
           padding: const EdgeInsets.only(left: 2.0),
@@ -110,16 +112,23 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
       );
     }).toList();
   }
+
+  /// Check if an entry overlaps with any entry in a column
+  bool _overlapsWithColumn(CnCalendarEntryPosition entry, List<CnCalendarEntryPosition> column) {
+    for (var existingEntry in column) {
+      if (entry.entry.dateFrom.isBefore(existingEntry.entry.dateUntil) &&
+          entry.entry.dateUntil.isAfter(existingEntry.entry.dateFrom)) {
+        return true;
+      }
+    }
+    return false;
+  }
 }
 
 class CnCalendarEntryPosition {
   final CnCalendarEntry entry;
-  int halvedCount;
-  int intendCount;
 
   CnCalendarEntryPosition({
     required this.entry,
-    this.halvedCount = 1,
-    this.intendCount = 1,
   });
 }
