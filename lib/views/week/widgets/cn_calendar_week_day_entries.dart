@@ -104,7 +104,7 @@ class CnCalendarWeekDayEntries extends StatelessWidget {
                     width: entryWidth,
                     height: height,
                     child: Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      padding: const EdgeInsets.symmetric(horizontal: 1.0),
                       child: CnCalendarWeekEntryCard(
                         entry: entry,
                         height: height,

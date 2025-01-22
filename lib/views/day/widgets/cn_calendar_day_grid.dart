@@ -22,7 +22,7 @@ class CnCalendarDayGrid extends StatefulWidget {
 
 class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
   ScrollController _scrollController = ScrollController();
-  double hourHeight = 70;
+  double hourHeight = 60;
 
   @override
   void initState() {
@@ -36,14 +36,10 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
     super.initState();
   }
 
-  List<CnCalendarEntry> getAllFullDayEvents() {
-    return widget.calendarEntries.where((entry) => entry.isFullDay).toList();
-  }
-
   @override
   Widget build(BuildContext context) {
-    double hourHeight = 70;
-    final fullDayEntries = getAllFullDayEvents();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final timedEntries = widget.calendarEntries.where((entry) => !entry.isFullDay).toList();
     return SingleChildScrollView(
       controller: _scrollController,
       child: Column(
@@ -62,7 +58,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
             );
           }),
           if (fullDayEntries.isNotEmpty) ...[
-            SizedBox(height: 16),
+            SizedBox(height: 8),
             Divider(),
           ],
           Stack(
@@ -70,7 +66,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
               CnCalendarDayTimeline(hourHeight: hourHeight),
               CnCalendarDayEntriesList(
                 hourHeight: hourHeight,
-                calendarEntries: widget.calendarEntries,
+                calendarEntries: timedEntries,
                 onEntryTapped: widget.onEntryTapped,
               ),
             ],
