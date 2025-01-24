@@ -27,10 +27,10 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
   @override
   void initState() {
     if (DateTime.now().day == widget.selectedDay.day) {
-      _scrollController = ScrollController(initialScrollOffset: DateTime.now().hour * hourHeight);
+      _scrollController = ScrollController(initialScrollOffset: DateTime.now().hour * (hourHeight - 4));
     } else {
       // Default to 8am. Used 7.5 to show the time in the timeline
-      _scrollController = ScrollController(initialScrollOffset: 7.5 * hourHeight);
+      _scrollController = ScrollController(initialScrollOffset: 7.5 * hourHeight - 4);
     }
 
     super.initState();

@@ -57,8 +57,8 @@ class Calendar extends StatelessWidget {
             CnCalendarEntry(
               id: '0',
               title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 5)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 8)),
+              dateFrom: DateTime.now().subtractDays(2),
+              dateUntil: DateTime.now().startOfDay,
               isFullDay: true,
               color: Colors.orange,
             ),
