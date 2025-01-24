@@ -17,9 +17,13 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
         Expanded(flex: 1, child: SizedBox.shrink()),
         Expanded(
           flex: 7,
-          child: Column(
-            spacing: 2,
-            children: placeFullDayEvents(),
+          child: Stack(
+            children: [
+              Column(
+                spacing: 2,
+                children: placeFullDayEvents(),
+              ),
+            ],
           ),
         ),
       ],
@@ -32,44 +36,28 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
       final start = entry.dateFrom.startOfDay;
       final end = entry.dateUntil.startOfDay;
 
-      final entryStartDay = start.weekday - 1; // Starttag (Montag = 0)
+      // Starting day is Monday
+      final entryStartDay = start.weekday - 1;
       final entryLength = end.difference(start).inDays + 1;
 
       return LayoutBuilder(
         builder: (context, constraints) {
-          final dayWidth = constraints.maxWidth / 7; // Breite eines Tages
-
-          // Liste von Widgets für die `Row`
-          List<Widget> rowChildren = [];
-
-          // 1. Platzhalter für die Tage vor dem Event
-          if (entryStartDay > 0) {
-            rowChildren.add(SizedBox(width: entryStartDay * dayWidth));
-          }
-
-          // 2. Container für das Event selbst
-          rowChildren.add(
-            Container(
-              height: 24,
-              width: entryLength * dayWidth,
-              decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
-              padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-              child: Text(
-                entry.title,
-                style: const TextStyle(color: Colors.white),
-              ),
-            ),
-          );
-
-          // 3. Platzhalter für die Tage nach dem Event (optional)
-          final remainingDays = 6 - (entryStartDay + entryLength - 1);
-          if (remainingDays > 0) {
-            rowChildren.add(SizedBox(width: remainingDays * dayWidth));
-          }
-
-          // Rückgabe der `Row`
+          // Width of a day
+          final dayWidth = constraints.maxWidth / 7;
           return Row(
-            children: rowChildren,
+            children: [
+              SizedBox(width: entryStartDay * dayWidth),
+              Container(
+                height: 24,
+                width: entryLength * dayWidth,
+                decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
+                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                child: Text(
+                  entry.title,
+                  style: const TextStyle(color: Colors.white),
+                ),
+              ),
+            ],
           );
         },
       );
