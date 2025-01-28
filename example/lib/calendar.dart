@@ -5,16 +5,26 @@ import 'package:cn_calendar/models/cn_calendar_view.dart';
 import 'package:cn_calendar/models/cn_decoration.dart';
 import 'package:flutter/material.dart';
 
-class Calendar extends StatelessWidget {
+class Calendar extends StatefulWidget {
   const Calendar({super.key});
+
+  @override
+  State<Calendar> createState() => _CalendarState();
+}
+
+class _CalendarState extends State<Calendar> {
+  DateTime selectedDate = DateTime.now().startOfDay;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: SafeArea(
         child: CnCalendar(
-          selectedDate: DateTime.now().startOfDay,
-          onDateChanged: (date, view) {},
+          selectedDate: selectedDate,
+          onDateChanged: (date, view) {
+            selectedDate = date;
+            setState(() {});
+          },
           initialView: CnCalendarView.day,
           decoration: CnDecoration(
             backgroundColor: Color(0xFFEDEDE9),
@@ -51,6 +61,22 @@ class Calendar extends StatelessWidget {
               title: 'Test',
               dateFrom: DateTime.now().startOfDay.add(Duration(minutes: 30)),
               dateUntil: DateTime.now().startOfDay.add(Duration(hours: 4)),
+              isFullDay: false,
+              color: Colors.blue,
+            ),
+            CnCalendarEntry(
+              id: '0',
+              title: 'Test',
+              dateFrom: DateTime.now().subtractDays(4).startOfDay.add(Duration(minutes: 30)),
+              dateUntil: DateTime.now().subtractDays(4).startOfDay.add(Duration(hours: 4)),
+              isFullDay: false,
+              color: Colors.orange,
+            ),
+            CnCalendarEntry(
+              id: '0',
+              title: 'Test',
+              dateFrom: DateTime.now().subtractDays(1).startOfDay.add(Duration(minutes: 30)),
+              dateUntil: DateTime.now().subtractDays(1).startOfDay.add(Duration(hours: 4)),
               isFullDay: false,
               color: Colors.blue,
             ),
