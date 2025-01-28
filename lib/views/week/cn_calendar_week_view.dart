@@ -43,8 +43,9 @@ class _CnCalendarWeekViewState extends State<CnCalendarWeekView> {
   @override
   void initState() {
     super.initState();
-    _pageController = PageController(initialPage: 1); // Start in der Mitte
-    _currentWeek = widget.selectedWeek; // Startwoche übernehmen
+    // Start in the middle of the PageView and set the current week
+    _pageController = PageController(initialPage: 1);
+    _currentWeek = widget.selectedWeek;
   }
 
   void _onPageChanged(int index) {
