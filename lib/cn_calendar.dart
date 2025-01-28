@@ -82,11 +82,13 @@ class CnCalendar extends StatefulWidget {
 
 class _CnCalendarState extends State<CnCalendar> {
   CnCalendarView _selectedView = CnCalendarView.week;
+  late PageController _pageController;
   DateTime _selectedDate = DateTime.now();
   Widget? shownView;
 
   @override
   void initState() {
+    _pageController = PageController(initialPage: 1); // Start in der Mitte
     _selectedView = widget.initialView;
     _selectedDate = widget.selectedDate;
     super.initState();
@@ -115,13 +117,40 @@ class _CnCalendarState extends State<CnCalendar> {
     }
   }
 
-  @override
-  Widget build(BuildContext context) {
-    // FIXME Aus der Build Methode raus
+  void _onPageChanged(int index) {
+    setState(() {
+      if (index == 0) {
+        // Zurückwischen: Gehe eine Woche zurück
+        _selectedDate = _selectedDate.subtract(Duration(days: viewLength()));
+        // Zurück zur mittleren Seite springen
+        _pageController.jumpToPage(1);
+      } else if (index == 2) {
+        // Vorwärtswischen: Gehe eine Woche vor
+        _selectedDate = _selectedDate.add(Duration(days: viewLength()));
+
+        // Zurück zur mittleren Seite springen
+        _pageController.jumpToPage(1);
+      }
+      widget.onDateChanged(_selectedDate, _selectedView);
+    });
+  }
+
+  int viewLength() {
     switch (_selectedView) {
       case CnCalendarView.month:
-        shownView = CnCalendarMonthView(
-          selectedMonth: _selectedDate.firstDayOfMonth,
+        return 30;
+      case CnCalendarView.week:
+        return 7;
+      case CnCalendarView.day:
+        return 1;
+    }
+  }
+
+  Widget _buildPage(DateTime date) {
+    switch (_selectedView) {
+      case CnCalendarView.month:
+        return CnCalendarMonthView(
+          selectedMonth: date.firstDayOfMonth,
           calendarEntries: getFilteredEntriesForView(),
           onDateChanged: (date) => widget.onDateChanged(date, CnCalendarView.month),
           onDayTapped: (date) {
@@ -131,10 +160,9 @@ class _CnCalendarState extends State<CnCalendar> {
             setState(() {});
           },
         );
-        break;
       case CnCalendarView.week:
-        shownView = CnCalendarWeekView(
-          selectedWeek: _selectedDate.firstDayOfWeek,
+        return CnCalendarWeekView(
+          selectedWeek: date.firstDayOfWeek,
           calendarEntries: getFilteredEntriesForView(),
           onEntryTapped: widget.onEntryTapped,
           onDateChanged: (date) => widget.onDateChanged(date, CnCalendarView.week),
@@ -144,17 +172,18 @@ class _CnCalendarState extends State<CnCalendar> {
             setState(() {});
           },
         );
-        break;
       case CnCalendarView.day:
-        shownView = CnCalendarDayView(
-          selectedDay: _selectedDate,
+        return CnCalendarDayView(
+          selectedDay: date,
           calendarEntries: getFilteredEntriesForView(),
           onDateChanged: (date) => widget.onDateChanged(date, CnCalendarView.day),
           onEntryTapped: widget.onEntryTapped,
         );
-        break;
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     return CnProvider(
       decoration: widget.decoration ?? CnDecoration(),
       showMonthView: widget.showMonthView,
@@ -175,14 +204,17 @@ class _CnCalendarState extends State<CnCalendar> {
               widget.onDateChanged.call(date, _selectedView);
             },
           ),
-          if (shownView != null)
-            Expanded(
-              child: LayoutBuilder(
-                builder: (context, constraints) {
-                  return shownView!;
-                },
-              ),
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: _onPageChanged,
+              children: [
+                _buildPage(_selectedDate.subtract(Duration(days: viewLength()))),
+                _buildPage(_selectedDate),
+                _buildPage(_selectedDate.add(Duration(days: viewLength()))),
+              ],
             ),
+          ),
         ],
       ),
     );

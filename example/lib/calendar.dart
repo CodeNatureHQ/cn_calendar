@@ -13,6 +13,8 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
+  // The calendar won't work properly if the current date isn't given inside the selectedDate property
+  // and updated
   DateTime selectedDate = DateTime.now().startOfDay;
 
   @override
