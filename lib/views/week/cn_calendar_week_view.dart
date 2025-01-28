@@ -1,11 +1,12 @@
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/provider/cn_provider.dart';
 import 'package:cn_calendar/views/week/widgets/cn_calendar_week_full_days_header.dart';
-import 'package:cn_calendar/views/week/widgets/cn_calendar_week_grid.dart';
 import 'package:cn_calendar/views/week/widgets/cn_calendar_week_week_days.dart';
 import 'package:flutter/material.dart';
 
-class CnCalendarWeekView extends StatelessWidget {
+import 'widgets/cn_calendar_week_grid.dart';
+
+class CnCalendarWeekView extends StatefulWidget {
   const CnCalendarWeekView({
     super.key,
     required this.selectedWeek,
@@ -31,29 +32,90 @@ class CnCalendarWeekView extends StatelessWidget {
   final Function(DateTime date)? onDayTapped;
 
   @override
-  Widget build(BuildContext context) {
+  State<CnCalendarWeekView> createState() => _CnCalendarWeekViewState();
+}
+
+class _CnCalendarWeekViewState extends State<CnCalendarWeekView> {
+  late PageController _pageController;
+
+  late DateTime _currentWeek;
+
+  @override
+  void initState() {
+    super.initState();
+    _pageController = PageController(initialPage: 1); // Start in der Mitte
+    _currentWeek = widget.selectedWeek; // Startwoche übernehmen
+  }
+
+  void _onPageChanged(int index) {
+    setState(() {
+      if (index == 0) {
+        // Zurückwischen: Gehe eine Woche zurück
+        _currentWeek = _currentWeek.subtract(const Duration(days: 7));
+        if (widget.onDateChanged != null) {
+          widget.onDateChanged!(_currentWeek);
+        }
+        // Zurück zur mittleren Seite springen
+        _pageController.jumpToPage(1);
+      } else if (index == 2) {
+        // Vorwärtswischen: Gehe eine Woche vor
+        _currentWeek = _currentWeek.add(const Duration(days: 7));
+        if (widget.onDateChanged != null) {
+          widget.onDateChanged!(_currentWeek);
+        }
+        // Zurück zur mittleren Seite springen
+        _pageController.jumpToPage(1);
+      }
+    });
+  }
+
+  Widget _buildPage(DateTime week) {
     final decoration = CnProvider.of(context).decoration;
+
     return Container(
       color: decoration.backgroundColor,
       child: Column(
         children: [
           CnCalendarWeekWeekDays(
-            selectedWeek: selectedWeek,
-            onDayTapped: onDayTapped,
+            selectedWeek: week,
+            onDayTapped: (day) {
+              // Optional: Handling, wenn ein Tag in der Woche getippt wird
+            },
             decoration: decoration,
           ),
           CnCalendarWeekFullDaysHeader(
-            calendarEntries: calendarEntries.where((entry) => entry.isFullDay).toList(),
+            calendarEntries: widget.calendarEntries.where((entry) => entry.isFullDay).toList(),
           ),
           Expanded(
             child: CnCalendarWeekGrid(
-              selectedWeek: selectedWeek,
-              calendarEntries: calendarEntries.where((entry) => !entry.isFullDay).toList(),
-              onEntryTapped: onEntryTapped,
+              selectedWeek: week,
+              calendarEntries: widget.calendarEntries.where((entry) => !entry.isFullDay).toList(),
+              onEntryTapped: (entry) {
+                // Optional: Handling, wenn ein Kalendereintrag getippt wird
+              },
             ),
           ),
         ],
       ),
     );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return PageView(
+      controller: _pageController,
+      onPageChanged: _onPageChanged,
+      children: [
+        _buildPage(_currentWeek.subtract(const Duration(days: 7))), // Vorherige Woche
+        _buildPage(_currentWeek), // Aktuelle Woche
+        _buildPage(_currentWeek.add(const Duration(days: 7))), // Nächste Woche
+      ],
+    );
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 }
