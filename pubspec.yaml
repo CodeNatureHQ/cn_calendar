@@ -11,7 +11,7 @@ dependencies:
   coo_extensions: ^0.1.2
   flutter:
     sdk: flutter
-  intl: ^0.20.1
+  intl: ^0.19.0
 
 dev_dependencies:
   flutter_test:
