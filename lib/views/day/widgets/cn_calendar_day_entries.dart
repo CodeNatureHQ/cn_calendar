@@ -1,3 +1,4 @@
+import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/views/day/widgets/cn_calendar_day_entry_card.dart';
 import 'package:flutter/material.dart';
@@ -45,7 +46,11 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
   List<Widget> _buildEntries(double width) {
     List<CnCalendarEntryPosition> entryPositions = [];
     entryPositions = widget.calendarEntries.map((entry) {
-      return CnCalendarEntryPosition(entry: entry);
+      return CnCalendarEntryPosition(
+        entry: entry,
+        dateFrom: entry.dateFrom,
+        dateUntil: entry.dateUntil,
+      );
     }).toList();
 
     // Sort by dateFrom
@@ -71,12 +76,23 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
     int maxColumns = columns.length;
 
     return entryPositions.map((entry) {
-      final startHour = entry.entry.dateFrom.hour;
-      final startMinute = entry.entry.dateFrom.minute;
-      final endHour = entry.entry.dateUntil.hour;
-      final endMinute = entry.entry.dateUntil.minute;
+      int startHour = entry.dateFrom.hour;
+      int startMinute = entry.dateFrom.minute;
+      int endHour = entry.dateUntil.hour;
+      int endMinute = entry.dateUntil.minute;
+
+      // Adjust the start and end times for events that span over midnight
+      if (entry.dateFrom.startOfDay.isBefore(entry.dateUntil.startOfDay)) {
+        startHour = 0;
+        startMinute = 0;
+      } else if (entry.dateFrom.startOfDay.isAfter(entry.dateUntil.startOfDay)) {
+        endHour = 24;
+        endMinute = 0;
+      }
 
       final top = startHour * widget.hourHeight + (startMinute / 60) * widget.hourHeight;
+
+      // Calculate the height of the entry
       final height = (endHour - startHour) * widget.hourHeight + (endMinute - startMinute) / 60 * widget.hourHeight;
 
       // Find the column index for this entry
@@ -125,10 +141,17 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
   }
 }
 
+/// The position of an entry in the calendar
+/// This is used to calculate the position of the entry in the calendar
+/// it is needed, since some entries can overlap over days
 class CnCalendarEntryPosition {
   final CnCalendarEntry entry;
+  final DateTime dateFrom;
+  final DateTime dateUntil;
 
   CnCalendarEntryPosition({
     required this.entry,
+    required this.dateFrom,
+    required this.dateUntil,
   });
 }
