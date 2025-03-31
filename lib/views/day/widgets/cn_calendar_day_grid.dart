@@ -65,6 +65,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
             children: [
               CnCalendarDayTimeline(hourHeight: hourHeight),
               CnCalendarDayEntriesList(
+                selectedDay: widget.selectedDay,
                 hourHeight: hourHeight,
                 calendarEntries: timedEntries,
                 onEntryTapped: widget.onEntryTapped,

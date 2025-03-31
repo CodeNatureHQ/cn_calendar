@@ -1,3 +1,4 @@
+import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/views/week/widgets/cn_calendar_week_day_entries.dart';
 import 'package:cn_calendar/views/week/widgets/cn_calendar_week_timeline.dart';
@@ -64,16 +65,18 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
                 ...List.generate(
                   7,
                   (index) {
+                    final selectedDate = widget.selectedWeek.add(Duration(days: index));
+                    // Zeige alle Einträge für den Tag an und diese, die den Tag überlappen
                     List<CnCalendarEntry> entriesForDay = widget.calendarEntries
-                        .where(
-                          (entry) =>
-                              entry.dateFrom.isSameDay(widget.selectedWeek.add(Duration(days: index))) &&
-                              !entry.isFullDay,
-                        )
+                        .where((entry) =>
+                            entry.dateFrom.isSameDay(selectedDate) && !entry.isFullDay ||
+                            entry.dateFrom.isBefore(selectedDate.startOfDay) &&
+                                entry.dateUntil.isAfter(selectedDate.startOfDay))
                         .toList();
 
                     return Expanded(
                       child: CnCalendarWeekDayEntries(
+                        selectedDay: widget.selectedWeek.add(Duration(days: index)),
                         hourHeight: hourHeight,
                         calendarEntries: entriesForDay,
                         onEntryTapped: widget.onEntryTapped,
