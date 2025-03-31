@@ -1,6 +1,7 @@
 import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/views/day/widgets/cn_calendar_day_entry_card.dart';
+import 'package:coo_extensions/coo_extensions.dart';
 import 'package:flutter/material.dart';
 
 /// All the entries for a day with the timeline divider every hour
@@ -81,13 +82,13 @@ class _CnCalendarDayEntriesListState extends State<CnCalendarDayEntriesList> {
       int endHour = entry.dateUntil.hour;
       int endMinute = entry.dateUntil.minute;
 
-      // Adjust the start and end times for events that span over midnight
-      if (entry.dateFrom.startOfDay.isBefore(entry.dateUntil.startOfDay)) {
+      // Adjust the start and end times for events that span over midnight from yesterday to today and today to tomorrow
+      if (entry.dateFrom.startOfDay.isYesterday) {
         startHour = 0;
         startMinute = 0;
-      } else if (entry.dateFrom.startOfDay.isAfter(entry.dateUntil.startOfDay)) {
-        endHour = 24;
-        endMinute = 0;
+      } else if (entry.dateUntil.startOfDay.isTomorrow) {
+        endHour = 23;
+        endMinute = 59;
       }
 
       final top = startHour * widget.hourHeight + (startMinute / 60) * widget.hourHeight;
