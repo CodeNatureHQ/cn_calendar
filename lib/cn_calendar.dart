@@ -83,20 +83,20 @@ class CnCalendar extends StatefulWidget {
 class _CnCalendarState extends State<CnCalendar> {
   CnCalendarView _selectedView = CnCalendarView.week;
   late PageController _pageController;
-  DateTime _selectedDate = DateTime.now();
+  DateTime _selectedDate = DateTime.now().startOfDay;
   Widget? shownView;
 
   @override
   void initState() {
     _pageController = PageController(initialPage: 1); // Start in der Mitte
     _selectedView = widget.initialView;
-    _selectedDate = widget.selectedDate;
+    _selectedDate = widget.selectedDate.startOfDay;
     super.initState();
   }
 
   @override
   void didUpdateWidget(covariant CnCalendar oldWidget) {
-    _selectedDate = widget.selectedDate;
+    _selectedDate = widget.selectedDate.startOfDay;
     super.didUpdateWidget(oldWidget);
   }
 
