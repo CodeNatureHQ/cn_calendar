@@ -112,7 +112,7 @@ class _CnCalendarState extends State<CnCalendar> {
         }).toList();
       case CnCalendarView.week:
         return widget.calendarEntries.where((entry) {
-          return entry.dateFrom.isSameWeek(_selectedDate);
+          return _selectedDate.overlapsWithWeek(entry.dateFrom, entry.dateUntil);
         }).toList();
       case CnCalendarView.day:
         return widget.calendarEntries.where((entry) {

@@ -142,4 +142,12 @@ extension DateExtension on DateTime {
       millisecondsSinceEpoch + delta.inMilliseconds - millisecondsSinceEpoch % delta.inMilliseconds,
     );
   }
+
+  /// Returns true if the given range (rangeStart to rangeEnd) overlaps with the week of this date.
+  bool overlapsWithWeek(DateTime rangeStart, DateTime rangeEnd) {
+    final weekStart = firstDayOfWeek;
+    final weekEnd = weekStart
+        .add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59, milliseconds: 999, microseconds: 999));
+    return rangeStart.isBefore(weekEnd) && rangeEnd.isAfter(weekStart);
+  }
 }

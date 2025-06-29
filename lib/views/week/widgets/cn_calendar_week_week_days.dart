@@ -1,5 +1,7 @@
 import 'package:cn_calendar/extensions/date.extension.dart';
+import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/models/cn_decoration.dart';
+import 'package:coo_extensions/extensions/date_time.extension.dart';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 
@@ -9,11 +11,13 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
     required this.selectedWeek,
     this.onDayTapped,
     required this.decoration,
+    this.entries = const [],
   });
 
   final DateTime selectedWeek;
   final Function(DateTime date)? onDayTapped;
   final CnDecoration decoration;
+  final List<CnCalendarEntry> entries;
 
   @override
   Widget build(BuildContext context) {
@@ -34,6 +38,11 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
               // The first column is the timeline
               if (index == 0) return Expanded(child: SizedBox.shrink());
               bool isToday = date.isSameDate(DateTime.now());
+
+              // Check which entries are for the current date
+              final entriesForDate =
+                  entries.where((entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay));
+
               return Expanded(
                 child: GestureDetector(
                   onTap: () => onDayTapped?.call(date),
@@ -68,6 +77,23 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                                   : decoration.weekDaysHeaderForegroundColor,
                             ),
                           ),
+                          Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              for (var e in entriesForDate.take(3))
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                  child: Container(
+                                    width: 4,
+                                    height: 4,
+                                    decoration: BoxDecoration(
+                                      color: e.color,
+                                      shape: BoxShape.circle,
+                                    ),
+                                  ),
+                                )
+                            ],
+                          )
                         ],
                       ),
                     ),

@@ -87,10 +87,7 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
                     final selectedDate = widget.selectedWeek.add(Duration(days: index));
                     // Zeige alle Einträge für den Tag an und diese, die den Tag überlappen
                     List<CnCalendarEntry> entriesForDay = widget.calendarEntries
-                        .where((entry) =>
-                            entry.dateFrom.isSameDay(selectedDate) && !entry.isFullDay ||
-                            entry.dateFrom.isBefore(selectedDate.startOfDay) &&
-                                entry.dateUntil.isAfter(selectedDate.startOfDay))
+                        .where((entry) => selectedDate.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay))
                         .toList();
 
                     return Expanded(
