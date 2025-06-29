@@ -82,6 +82,7 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                                         : decoration.weekDaysHeaderForegroundColor,
                               ),
                             ),
+                            SizedBox(height: 4),
                             if (entriesForDate.isEmpty) SizedBox(height: 4),
                             Row(
                               mainAxisAlignment: MainAxisAlignment.center,
