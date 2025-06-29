@@ -5,10 +5,12 @@ import 'package:flutter/material.dart';
 class CnCalendarWeekFullDaysHeader extends StatelessWidget {
   const CnCalendarWeekFullDaysHeader({
     super.key,
+    required this.selectedWeek,
     required this.calendarEntries,
     required this.onEntryTapped,
   });
 
+  final DateTime selectedWeek;
   final List<CnCalendarEntry> calendarEntries;
   final Function(CnCalendarEntry entry)? onEntryTapped;
 
@@ -33,18 +35,27 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
   }
 
   List<Widget> placeFullDayEvents() {
-    return calendarEntries.map((entry) {
-      // Check from the startOfDay to get the difference in days correct
-      final start = entry.dateFrom.startOfDay;
-      final end = entry.dateUntil.startOfDay;
+    final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
+    final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
 
-      // Starting day is Monday
-      final entryStartDay = start.weekday - 1;
-      final entryLength = end.difference(start).inDays + 1;
+    return calendarEntries.map((entry) {
+      final eventStart = entry.dateFrom.startOfDay;
+      final eventEnd = entry.dateUntil.startOfDay;
+
+      // Clip to week
+      final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
+      final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
+
+      if (visibleStart.isAfter(visibleEnd)) {
+        // Not visible in this week
+        return const SizedBox.shrink();
+      }
+
+      final entryStartDay = visibleStart.difference(weekStart).inDays;
+      final entryLength = visibleEnd.difference(visibleStart).inDays + 1;
 
       return LayoutBuilder(
         builder: (context, constraints) {
-          // Width of a day
           final dayWidth = constraints.maxWidth / 7;
           return Row(
             children: [
@@ -55,7 +66,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
                   height: 24,
                   width: entryLength * dayWidth,
                   decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
-                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                   child: Text(
                     entry.title,
                     style: const TextStyle(color: Colors.white),

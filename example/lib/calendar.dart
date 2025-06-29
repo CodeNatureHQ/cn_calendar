@@ -49,10 +49,10 @@ class _CalendarState extends State<Calendar> {
           calendarEntries: [
             CnCalendarEntry(
               id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().endOfDay.subtract(Duration(hours: 1)),
-              dateUntil: DateTime.now().endOfDay.add(Duration(hours: 3)),
-              isFullDay: false,
+              title: 'Month bug',
+              dateFrom: DateTime.now().endOfDay.subtract(Duration(days: 1)),
+              dateUntil: DateTime.now().endOfDay.add(Duration(days: 2)),
+              isFullDay: true,
               color: Colors.pink,
             ),
             CnCalendarEntry(
