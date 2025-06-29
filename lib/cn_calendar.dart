@@ -25,6 +25,7 @@ class CnCalendar extends StatefulWidget {
     this.calendarEntries = const [],
     this.onMonthViewDayTapped,
     this.onEntryTapped,
+    this.onTimeTapped,
     this.showMonthView = true,
     this.showWeekView = true,
     this.showDayView = true,
@@ -70,6 +71,9 @@ class CnCalendar extends StatefulWidget {
 
   /// What should happen when tapped on an entry
   final Function(CnCalendarEntry entry)? onEntryTapped;
+
+  /// What should happen when tapped on a time slot
+  final Function(DateTime time)? onTimeTapped;
 
   // Show or hide the views in the selector
   final bool showMonthView;
@@ -171,6 +175,7 @@ class _CnCalendarState extends State<CnCalendar> {
             _selectedDate = date;
             setState(() {});
           },
+          onTimeTapped: widget.onTimeTapped,
         );
       case CnCalendarView.day:
         return CnCalendarDayView(
@@ -178,6 +183,7 @@ class _CnCalendarState extends State<CnCalendar> {
           calendarEntries: getFilteredEntriesForView(),
           onDateChanged: (date) => widget.onDateChanged(date, CnCalendarView.day),
           onEntryTapped: widget.onEntryTapped,
+          onTimeTapped: widget.onTimeTapped,
         );
     }
   }

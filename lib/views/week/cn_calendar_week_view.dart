@@ -13,6 +13,7 @@ class CnCalendarWeekView extends StatelessWidget {
     this.onDateChanged,
     this.onEntryTapped,
     this.onDayTapped,
+    this.onTimeTapped,
   });
 
   /// Should always be the first day of the week
@@ -29,6 +30,10 @@ class CnCalendarWeekView extends StatelessWidget {
 
   /// Called whenever a day in the week days section is tapped
   final Function(DateTime date)? onDayTapped;
+
+  /// Called whenever a time slot is tapped
+  /// This is useful for creating new entries at a specific time
+  final Function(DateTime time)? onTimeTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -50,6 +55,7 @@ class CnCalendarWeekView extends StatelessWidget {
               selectedWeek: selectedWeek,
               calendarEntries: calendarEntries.where((entry) => !entry.isFullDay).toList(),
               onEntryTapped: onEntryTapped,
+              onTimeTapped: onTimeTapped,
             ),
           ),
         ],

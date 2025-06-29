@@ -10,11 +10,13 @@ class CnCalendarDayGrid extends StatefulWidget {
     required this.selectedDay,
     required this.calendarEntries,
     this.onEntryTapped,
+    this.onTimeTapped,
   });
 
   final DateTime selectedDay;
   final List<CnCalendarEntry> calendarEntries;
   final Function(CnCalendarEntry entry)? onEntryTapped;
+  final Function(DateTime time)? onTimeTapped;
 
   @override
   State<CnCalendarDayGrid> createState() => _CnCalendarDayGridState();
@@ -34,6 +36,23 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
     }
 
     super.initState();
+  }
+
+  void _handleTimeSlotTap(TapDownDetails details) {
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final localOffset = box.globalToLocal(details.globalPosition);
+    final scrollOffset = _scrollController.offset;
+    final y = localOffset.dy + scrollOffset;
+    final hour = y ~/ hourHeight;
+    final minute = ((y % hourHeight) / hourHeight * 60).round();
+    final tappedTime = DateTime(
+      widget.selectedDay.year,
+      widget.selectedDay.month,
+      widget.selectedDay.day,
+      hour,
+      minute,
+    );
+    widget.onTimeTapped?.call(tappedTime);
   }
 
   @override
@@ -61,16 +80,20 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
             SizedBox(height: 8),
             Divider(),
           ],
-          Stack(
-            children: [
-              CnCalendarDayTimeline(hourHeight: hourHeight),
-              CnCalendarDayEntriesList(
-                selectedDay: widget.selectedDay,
-                hourHeight: hourHeight,
-                calendarEntries: timedEntries,
-                onEntryTapped: widget.onEntryTapped,
-              ),
-            ],
+          GestureDetector(
+            behavior: HitTestBehavior.translucent,
+            onTapDown: _handleTimeSlotTap,
+            child: Stack(
+              children: [
+                CnCalendarDayTimeline(hourHeight: hourHeight),
+                CnCalendarDayEntriesList(
+                  selectedDay: widget.selectedDay,
+                  hourHeight: hourHeight,
+                  calendarEntries: timedEntries,
+                  onEntryTapped: widget.onEntryTapped,
+                ),
+              ],
+            ),
           ),
         ],
       ),

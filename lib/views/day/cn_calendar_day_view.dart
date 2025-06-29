@@ -10,6 +10,7 @@ class CnCalendarDayView extends StatelessWidget {
     this.calendarEntries = const [],
     this.onDateChanged,
     this.onEntryTapped,
+    this.onTimeTapped,
   });
 
   /// Should always be the first day of the week
@@ -24,6 +25,10 @@ class CnCalendarDayView extends StatelessWidget {
   /// Called whenever an entry is tapped
   final Function(CnCalendarEntry entry)? onEntryTapped;
 
+  /// Called whenever a time slot is tapped
+  /// This is useful for creating new entries at a specific time
+  final Function(DateTime time)? onTimeTapped;
+
   @override
   Widget build(BuildContext context) {
     final decoration = CnProvider.of(context).decoration;
@@ -33,6 +38,7 @@ class CnCalendarDayView extends StatelessWidget {
         selectedDay: selectedDay,
         calendarEntries: calendarEntries,
         onEntryTapped: onEntryTapped,
+        onTimeTapped: onTimeTapped,
       ),
     );
   }

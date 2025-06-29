@@ -11,11 +11,13 @@ class CnCalendarWeekGrid extends StatefulWidget {
     required this.selectedWeek,
     required this.calendarEntries,
     this.onEntryTapped,
+    this.onTimeTapped,
   });
 
   final DateTime selectedWeek;
   final List<CnCalendarEntry> calendarEntries;
   final Function(CnCalendarEntry entry)? onEntryTapped;
+  final Function(DateTime time)? onTimeTapped;
 
   @override
   State<CnCalendarWeekGrid> createState() => _CnCalendarWeekGridState();
@@ -35,6 +37,23 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
 
   List<CnCalendarEntry> getAllFullDayEvents() {
     return widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+  }
+
+  void _handleTimeSlotTap(TapDownDetails details, DateTime day) {
+    final RenderBox box = context.findRenderObject() as RenderBox;
+    final localOffset = box.globalToLocal(details.globalPosition);
+    final scrollOffset = _scrollController.offset;
+    final y = localOffset.dy + scrollOffset;
+    final hour = y ~/ hourHeight;
+    final minute = ((y % hourHeight) / hourHeight * 60).round();
+    final tappedTime = DateTime(
+      day.year,
+      day.month,
+      day.day,
+      hour,
+      minute,
+    );
+    widget.onTimeTapped?.call(tappedTime);
   }
 
   @override
@@ -75,11 +94,15 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
                         .toList();
 
                     return Expanded(
-                      child: CnCalendarWeekDayEntries(
-                        selectedDay: widget.selectedWeek.add(Duration(days: index)),
-                        hourHeight: hourHeight,
-                        calendarEntries: entriesForDay,
-                        onEntryTapped: widget.onEntryTapped,
+                      child: GestureDetector(
+                        behavior: HitTestBehavior.translucent,
+                        onTapDown: (details) => _handleTimeSlotTap(details, selectedDate),
+                        child: CnCalendarWeekDayEntries(
+                          selectedDay: widget.selectedWeek.add(Duration(days: index)),
+                          hourHeight: hourHeight,
+                          calendarEntries: entriesForDay,
+                          onEntryTapped: widget.onEntryTapped,
+                        ),
                       ),
                     );
                   },
