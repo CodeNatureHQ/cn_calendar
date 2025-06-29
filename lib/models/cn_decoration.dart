@@ -17,6 +17,8 @@ class CnDecoration {
     this.monthViewNotSelectedMonthBackgroundColor = const Color(0xFFFAFAFE),
     this.monthViewSelectedMonthBorderColor = Colors.grey,
     this.monthViewNotSelectedMonthBorderColor = const Color.fromARGB(255, 185, 180, 180),
+    this.entryDotColor = Colors.white,
+    this.entryDotColorActiveDay = Colors.black,
 
     // Day View
     this.dayViewBackgroundColor = Colors.white,
@@ -52,8 +54,8 @@ class CnDecoration {
   final Color monthViewNotSelectedMonthBackgroundColor;
   final Color monthViewSelectedMonthBorderColor;
   final Color monthViewNotSelectedMonthBorderColor;
-  final Color entryDotColor = Colors.white;
-  final Color entryDotColorActiveDay = Colors.black;
+  final Color entryDotColor;
+  final Color entryDotColorActiveDay;
 
   // Day View #########################################################################################################
   final Color dayViewBackgroundColor;
