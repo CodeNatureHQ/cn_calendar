@@ -40,8 +40,9 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
               bool isToday = date.isSameDate(DateTime.now());
 
               // Check which entries are for the current date
-              final entriesForDate =
-                  entries.where((entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay));
+              final entriesForDate = entries.where(
+                (entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay),
+              );
 
               return Expanded(
                 child: GestureDetector(
@@ -59,9 +60,10 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                             weekdays[weekdayIndex],
                             textAlign: TextAlign.center,
                             style: TextStyle(
-                              color: isToday
-                                  ? decoration.weekDaysHeaderSelectedForegroundColor
-                                  : decoration.weekDaysHeaderForegroundColor,
+                              color:
+                                  isToday
+                                      ? decoration.weekDaysHeaderSelectedForegroundColor
+                                      : decoration.weekDaysHeaderForegroundColor,
                               fontSize: 12,
                             ),
                           ),
@@ -72,11 +74,13 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                             style: TextStyle(
                               fontWeight: FontWeight.bold,
                               fontSize: 16,
-                              color: isToday
-                                  ? decoration.weekDaysHeaderSelectedForegroundColor
-                                  : decoration.weekDaysHeaderForegroundColor,
+                              color:
+                                  isToday
+                                      ? decoration.weekDaysHeaderSelectedForegroundColor
+                                      : decoration.weekDaysHeaderForegroundColor,
                             ),
                           ),
+                          if (entriesForDate.isEmpty) SizedBox(height: 4),
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -87,13 +91,13 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                                     width: 4,
                                     height: 4,
                                     decoration: BoxDecoration(
-                                      color: e.color,
+                                      color: isToday ? decoration.entryDotColorActiveDay : decoration.entryDotColor,
                                       shape: BoxShape.circle,
                                     ),
                                   ),
-                                )
+                                ),
                             ],
-                          )
+                          ),
                         ],
                       ),
                     ),

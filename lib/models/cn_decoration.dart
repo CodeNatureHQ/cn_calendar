@@ -52,6 +52,8 @@ class CnDecoration {
   final Color monthViewNotSelectedMonthBackgroundColor;
   final Color monthViewSelectedMonthBorderColor;
   final Color monthViewNotSelectedMonthBorderColor;
+  final Color entryDotColor = Colors.white;
+  final Color entryDotColorActiveDay = Colors.black;
 
   // Day View #########################################################################################################
   final Color dayViewBackgroundColor;
