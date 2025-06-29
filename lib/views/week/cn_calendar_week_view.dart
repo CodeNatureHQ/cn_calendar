@@ -49,6 +49,7 @@ class CnCalendarWeekView extends StatelessWidget {
           ),
           CnCalendarWeekFullDaysHeader(
             calendarEntries: calendarEntries.where((entry) => entry.isFullDay).toList(),
+            onEntryTapped: onEntryTapped,
           ),
           Expanded(
             child: CnCalendarWeekGrid(

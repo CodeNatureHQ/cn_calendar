@@ -118,7 +118,6 @@ class CnCalendarDayEntriesList extends StatelessWidget {
             width: entryWidth - 4,
             onTap: () {
               onEntryTapped?.call(entry.entry);
-              entry.entry.onTap?.call();
             },
           ),
         ),

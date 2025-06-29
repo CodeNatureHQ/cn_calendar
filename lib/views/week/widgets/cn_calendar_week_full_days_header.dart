@@ -6,9 +6,11 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
   const CnCalendarWeekFullDaysHeader({
     super.key,
     required this.calendarEntries,
+    required this.onEntryTapped,
   });
 
   final List<CnCalendarEntry> calendarEntries;
+  final Function(CnCalendarEntry entry)? onEntryTapped;
 
   @override
   Widget build(BuildContext context) {
@@ -47,14 +49,17 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
           return Row(
             children: [
               SizedBox(width: entryStartDay * dayWidth),
-              Container(
-                height: 24,
-                width: entryLength * dayWidth,
-                decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
-                padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                child: Text(
-                  entry.title,
-                  style: const TextStyle(color: Colors.white),
+              GestureDetector(
+                onTap: () => onEntryTapped?.call(entry),
+                child: Container(
+                  height: 24,
+                  width: entryLength * dayWidth,
+                  decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
+                  padding: EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                  child: Text(
+                    entry.title,
+                    style: const TextStyle(color: Colors.white),
+                  ),
                 ),
               ),
             ],

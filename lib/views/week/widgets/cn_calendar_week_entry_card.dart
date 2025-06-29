@@ -18,7 +18,6 @@ class CnCalendarWeekEntryCard extends StatelessWidget {
     return GestureDetector(
       onTap: () {
         onTap?.call();
-        entry.onTap?.call();
       },
       child: Container(
         height: height,

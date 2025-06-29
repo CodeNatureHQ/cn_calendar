@@ -25,8 +25,6 @@ class CnCalendarEntry {
   /// The Image URL to display in the Entry card
   final String? imageUrl;
 
-  final void Function()? onTap;
-
   CnCalendarEntry({
     required this.id,
     required this.title,
@@ -36,6 +34,5 @@ class CnCalendarEntry {
     this.imageUrl,
     this.hasTimeStamp = false,
     this.color = Colors.black,
-    this.onTap,
   });
 }

@@ -16,10 +16,7 @@ class CnCalendarFullDayEntryCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GestureDetector(
-      onTap: () {
-        onTap?.call();
-        entry.onTap?.call();
-      },
+      onTap: () => onTap?.call(),
       child: Container(
         width: width ?? double.infinity,
         padding: EdgeInsets.all(8),
