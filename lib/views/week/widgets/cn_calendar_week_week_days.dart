@@ -48,57 +48,60 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => onDayTapped?.call(date),
                   child: Center(
-                    child: Container(
-                      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                      decoration: BoxDecoration(
-                        color: isToday ? decoration.weekDaysHeaderSelectedBackgroundColor : null,
-                        borderRadius: BorderRadius.circular(8),
-                      ),
-                      child: Column(
-                        children: [
-                          Text(
-                            weekdays[weekdayIndex],
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              color:
-                                  isToday
-                                      ? decoration.weekDaysHeaderSelectedForegroundColor
-                                      : decoration.weekDaysHeaderForegroundColor,
-                              fontSize: 12,
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                      child: Container(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        decoration: BoxDecoration(
+                          color: isToday ? decoration.weekDaysHeaderSelectedBackgroundColor : null,
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: Column(
+                          children: [
+                            Text(
+                              weekdays[weekdayIndex],
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                color:
+                                    isToday
+                                        ? decoration.weekDaysHeaderSelectedForegroundColor
+                                        : decoration.weekDaysHeaderForegroundColor,
+                                fontSize: 12,
+                              ),
                             ),
-                          ),
-                          SizedBox(height: 4),
-                          Text(
-                            date.day.toString(),
-                            textAlign: TextAlign.center,
-                            style: TextStyle(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 16,
-                              color:
-                                  isToday
-                                      ? decoration.weekDaysHeaderSelectedForegroundColor
-                                      : decoration.weekDaysHeaderForegroundColor,
+                            SizedBox(height: 4),
+                            Text(
+                              date.day.toString(),
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color:
+                                    isToday
+                                        ? decoration.weekDaysHeaderSelectedForegroundColor
+                                        : decoration.weekDaysHeaderForegroundColor,
+                              ),
                             ),
-                          ),
-                          if (entriesForDate.isEmpty) SizedBox(height: 4),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              for (var e in entriesForDate.take(3))
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 2.0),
-                                  child: Container(
-                                    width: 4,
-                                    height: 4,
-                                    decoration: BoxDecoration(
-                                      color: isToday ? decoration.entryDotColorActiveDay : decoration.entryDotColor,
-                                      shape: BoxShape.circle,
+                            if (entriesForDate.isEmpty) SizedBox(height: 4),
+                            Row(
+                              mainAxisAlignment: MainAxisAlignment.center,
+                              children: [
+                                for (var e in entriesForDate.take(3))
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 2.0),
+                                    child: Container(
+                                      width: 4,
+                                      height: 4,
+                                      decoration: BoxDecoration(
+                                        color: isToday ? decoration.entryDotColorActiveDay : decoration.entryDotColor,
+                                        shape: BoxShape.circle,
+                                      ),
                                     ),
                                   ),
-                                ),
-                            ],
-                          ),
-                        ],
+                              ],
+                            ),
+                          ],
+                        ),
                       ),
                     ),
                   ),
