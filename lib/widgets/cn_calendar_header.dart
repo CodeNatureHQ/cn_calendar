@@ -14,7 +14,8 @@ class CnCalendarHeader extends StatefulWidget {
     required this.selectedView,
     required this.selectedDate,
     this.onViewChanged,
-    this.ledingWidget,
+    this.leadingWidget,
+    this.onHeaderTap,
   });
 
   /// Callback for date changes in the calendar
@@ -31,7 +32,10 @@ class CnCalendarHeader extends StatefulWidget {
   final DateTime selectedDate;
 
   /// Leading widget in the header
-  final Widget? ledingWidget;
+  final Widget? leadingWidget;
+
+  /// Callback for header tap
+  final VoidCallback? onHeaderTap;
 
   @override
   State<CnCalendarHeader> createState() => _CnCalendarHeaderState();
@@ -56,19 +60,11 @@ class _CnCalendarHeaderState extends State<CnCalendarHeader> {
     }
 
     return Container(
-      padding: EdgeInsets.only(
-        left: decoration.horizontalHeaderPadding,
-        right: decoration.horizontalHeaderPadding,
-      ),
-      decoration: BoxDecoration(
-        color: decoration.headerBackgroundColor,
-      ),
+      padding: EdgeInsets.only(left: decoration.horizontalHeaderPadding, right: decoration.horizontalHeaderPadding),
+      decoration: BoxDecoration(color: decoration.headerBackgroundColor),
       child: Row(
         children: [
-          Expanded(
-            flex: 1,
-            child: widget.ledingWidget ?? Container(),
-          ),
+          Expanded(flex: 1, child: widget.leadingWidget ?? Container()),
           SizedBox(width: 16),
           IconButton(
             icon: Icon(Icons.arrow_back_ios, color: decoration.headerForegroundColor),
@@ -78,13 +74,16 @@ class _CnCalendarHeaderState extends State<CnCalendarHeader> {
           ),
           Expanded(
             flex: 4,
-            child: Text(
-              title,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: decoration.headerForegroundColor,
-                    fontWeight: FontWeight.bold,
-                  ),
+            child: GestureDetector(
+              onTap: widget.onHeaderTap,
+              behavior: HitTestBehavior.opaque,
+              child: Text(
+                title,
+                textAlign: TextAlign.center,
+                style: Theme.of(
+                  context,
+                ).textTheme.titleSmall?.copyWith(color: decoration.headerForegroundColor, fontWeight: FontWeight.bold),
+              ),
             ),
           ),
           IconButton(
@@ -96,9 +95,7 @@ class _CnCalendarHeaderState extends State<CnCalendarHeader> {
           SizedBox(width: 16),
           Expanded(
             flex: 1,
-            child: CnCalendarViewPicker(
-              onViewChanged: (view) => widget.onViewChanged?.call(widget.selectedDate, view),
-            ),
+            child: CnCalendarViewPicker(onViewChanged: (view) => widget.onViewChanged?.call(widget.selectedDate, view)),
           ),
         ],
       ),

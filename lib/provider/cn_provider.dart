@@ -7,6 +7,9 @@ class CnProvider extends InheritedWidget {
   final bool showMonthView;
   final bool showWeekView;
   final bool showDayView;
+  final String? monthViewTitle;
+  final String? weekViewTitle;
+  final String? dayViewTitle;
 
   const CnProvider({
     super.key,
@@ -14,6 +17,9 @@ class CnProvider extends InheritedWidget {
     required this.showMonthView,
     required this.showWeekView,
     required this.showDayView,
+    this.monthViewTitle,
+    this.weekViewTitle,
+    this.dayViewTitle,
     required super.child,
   });
 

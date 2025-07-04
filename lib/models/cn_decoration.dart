@@ -33,6 +33,9 @@ class CnDecoration {
     this.weekDaysHeaderForegroundColor = Colors.black,
     this.weekDaysHeaderSelectedBackgroundColor = Colors.black,
     this.weekDaysHeaderSelectedForegroundColor = Colors.white,
+
+    // MISC
+    this.dayViewHourHeight = 60.0,
   });
 
   // COLORS #############################Color.fromARGB(255, 183, 183, 183)########################################################
@@ -77,4 +80,8 @@ class CnDecoration {
   final Color weekDaysHeaderForegroundColor;
   final Color weekDaysHeaderSelectedBackgroundColor;
   final Color weekDaysHeaderSelectedForegroundColor;
+
+  // MISC ############################################################################################################
+  /// Height of the hour in the day view
+  final double dayViewHourHeight;
 }

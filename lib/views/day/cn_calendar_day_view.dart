@@ -39,6 +39,7 @@ class CnCalendarDayView extends StatelessWidget {
         calendarEntries: calendarEntries,
         onEntryTapped: onEntryTapped,
         onTimeTapped: onTimeTapped,
+        hourHeight: CnProvider.of(context).decoration.dayViewHourHeight,
       ),
     );
   }

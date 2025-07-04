@@ -32,6 +32,7 @@ class CnCalendarDayEntriesList extends StatelessWidget {
           return SizedBox(
             height: (paintHours + 4) * hourHeight,
             child: Stack(
+              clipBehavior: Clip.none, // Allow overflow for small entries
               children: _buildEntries(width),
             ),
           );
@@ -43,11 +44,7 @@ class CnCalendarDayEntriesList extends StatelessWidget {
   List<Widget> _buildEntries(double width) {
     List<CnCalendarEntryPosition> entryPositions = [];
     entryPositions = calendarEntries.map((entry) {
-      return CnCalendarEntryPosition(
-        entry: entry,
-        dateFrom: entry.dateFrom,
-        dateUntil: entry.dateUntil,
-      );
+      return CnCalendarEntryPosition(entry: entry, dateFrom: entry.dateFrom, dateUntil: entry.dateUntil);
     }).toList();
 
     // Sort by dateFrom
@@ -108,17 +105,20 @@ class CnCalendarDayEntriesList extends StatelessWidget {
       return Positioned(
         top: top,
         left: left,
-        height: height,
-        child: Padding(
-          padding: const EdgeInsets.only(left: 2.0),
-          child: CnCalendarDayEntryCard(
-            entry: entry.entry,
-            height: height,
-            // - 4 is used to prevent the shadow from being cut off
-            width: entryWidth - 4,
-            onTap: () {
-              onEntryTapped?.call(entry.entry);
-            },
+        child: SizedBox(
+          height: height,
+          width: entryWidth,
+          child: Padding(
+            padding: const EdgeInsets.only(left: 2.0),
+            child: CnCalendarDayEntryCard(
+              entry: entry.entry,
+              height: height,
+              // - 4 is used to prevent the shadow from being cut off
+              width: entryWidth - 4,
+              onTap: () {
+                onEntryTapped?.call(entry.entry);
+              },
+            ),
           ),
         ),
       );
@@ -145,9 +145,5 @@ class CnCalendarEntryPosition {
   final DateTime dateFrom;
   final DateTime dateUntil;
 
-  CnCalendarEntryPosition({
-    required this.entry,
-    required this.dateFrom,
-    required this.dateUntil,
-  });
+  CnCalendarEntryPosition({required this.entry, required this.dateFrom, required this.dateUntil});
 }

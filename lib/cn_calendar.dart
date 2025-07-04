@@ -29,6 +29,10 @@ class CnCalendar extends StatefulWidget {
     this.showMonthView = true,
     this.showWeekView = true,
     this.showDayView = true,
+    this.dayViewTitle,
+    this.weekViewTitle,
+    this.monthViewTitle,
+    this.onHeaderTap,
   });
 
   final DateTime selectedDate;
@@ -75,10 +79,17 @@ class CnCalendar extends StatefulWidget {
   /// What should happen when tapped on a time slot
   final Function(DateTime time)? onTimeTapped;
 
+  /// When tapped on the header, this callback is called
+  final VoidCallback? onHeaderTap;
+
   // Show or hide the views in the selector
   final bool showMonthView;
   final bool showWeekView;
   final bool showDayView;
+
+  final String? dayViewTitle;
+  final String? weekViewTitle;
+  final String? monthViewTitle;
 
   @override
   State<CnCalendar> createState() => _CnCalendarState();
@@ -195,11 +206,15 @@ class _CnCalendarState extends State<CnCalendar> {
       showMonthView: widget.showMonthView,
       showWeekView: widget.showWeekView,
       showDayView: widget.showDayView,
+      dayViewTitle: widget.dayViewTitle,
+      weekViewTitle: widget.weekViewTitle,
+      monthViewTitle: widget.monthViewTitle,
       child: Column(
         children: [
           CnCalendarHeader(
             selectedView: _selectedView,
-            ledingWidget: widget.leadingHeaderWidget,
+            leadingWidget: widget.leadingHeaderWidget,
+            onHeaderTap: widget.onHeaderTap,
             selectedDate: _selectedDate,
             onViewChanged: (date, view) {
               _selectedView = view;

@@ -4,10 +4,7 @@ import 'package:flutter/material.dart';
 
 /// A widget that allows the user to select the view of the calendar
 class CnCalendarViewPicker extends StatelessWidget {
-  const CnCalendarViewPicker({
-    super.key,
-    required this.onViewChanged,
-  });
+  const CnCalendarViewPicker({super.key, required this.onViewChanged});
 
   /// Callback for view changes in the calendar [CnCalendarView.month], [CnCalendarView.week], [CnCalendarView.day]
   final Function(CnCalendarView selectedView) onViewChanged;
@@ -16,28 +13,16 @@ class CnCalendarViewPicker extends StatelessWidget {
   Widget build(BuildContext context) {
     final cnProvider = CnProvider.of(context);
     return PopupMenuButton<CnCalendarView>(
-      icon: Icon(
-        cnProvider.decoration.headerSelectViewIcon,
-        color: cnProvider.decoration.headerSelectViewIconColor,
-      ),
+      icon: Icon(cnProvider.decoration.headerSelectViewIcon, color: cnProvider.decoration.headerSelectViewIconColor),
       onSelected: onViewChanged,
       itemBuilder: (context) {
         return [
           if (cnProvider.showDayView)
-            PopupMenuItem(
-              value: CnCalendarView.day,
-              child: Text('Day'),
-            ),
+            PopupMenuItem(value: CnCalendarView.day, child: Text(cnProvider.dayViewTitle ?? 'Day')),
           if (cnProvider.showWeekView)
-            PopupMenuItem(
-              value: CnCalendarView.week,
-              child: Text('Week'),
-            ),
+            PopupMenuItem(value: CnCalendarView.week, child: Text(cnProvider.weekViewTitle ?? 'Week')),
           if (cnProvider.showMonthView)
-            PopupMenuItem(
-              value: CnCalendarView.month,
-              child: Text('Month'),
-            ),
+            PopupMenuItem(value: CnCalendarView.month, child: Text(cnProvider.monthViewTitle ?? 'Month')),
         ];
       },
     );

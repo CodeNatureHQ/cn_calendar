@@ -31,8 +31,13 @@ class _CalendarState extends State<Calendar> {
             selectedDate = date;
             setState(() {});
           },
+          onHeaderTap: () {
+            selectedDate = DateTime.now().startOfDay;
+            setState(() {});
+          },
           initialView: CnCalendarView.day,
           decoration: CnDecoration(
+            dayViewHourHeight: 90,
             backgroundColor: Color(0xFFEDEDE9),
             headerBackgroundColor: Color(0xFF119589),
             headerForegroundColor: Color(0xFFEDEDE9),
@@ -107,6 +112,38 @@ class _CalendarState extends State<Calendar> {
               id: '0',
               title: 'Test',
               dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 15)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 30)),
+              isFullDay: false,
+              color: Colors.black,
+            ),
+            CnCalendarEntry(
+              id: '0',
+              title: 'Test',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 00)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 15)),
+              isFullDay: false,
+              color: Colors.black,
+            ),
+            CnCalendarEntry(
+              id: '0',
+              title: 'Test',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 30)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 45)),
+              isFullDay: false,
+              color: Colors.black,
+            ),
+            CnCalendarEntry(
+              id: '0',
+              title: 'Test',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 45)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
+              isFullDay: false,
+              color: Colors.black,
+            ),
+            CnCalendarEntry(
+              id: '0',
+              title: 'Test',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 50)),
               dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
               isFullDay: false,
               color: Colors.black,
@@ -118,6 +155,24 @@ class _CalendarState extends State<Calendar> {
               dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6)),
               isFullDay: false,
               color: Colors.green,
+            ),
+            // Test entry with very short duration (3 minutes) - should not show text
+            CnCalendarEntry(
+              id: '0',
+              title: 'Short Entry',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 8)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 8, minutes: 3)),
+              isFullDay: false,
+              color: Colors.red,
+            ),
+            // Test entry with exactly 5 minutes - should show text
+            CnCalendarEntry(
+              id: '0',
+              title: '5 Min Entry',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 9)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 9, minutes: 5)),
+              isFullDay: false,
+              color: Colors.amber,
             ),
           ],
         ),
