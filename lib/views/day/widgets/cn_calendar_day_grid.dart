@@ -76,7 +76,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
           }),
           if (fullDayEntries.isNotEmpty) ...[SizedBox(height: 8), Divider()],
           GestureDetector(
-            behavior: HitTestBehavior.translucent,
+            behavior: HitTestBehavior.opaque,
             onTapDown: _handleTimeSlotTap,
             child: Stack(
               children: [

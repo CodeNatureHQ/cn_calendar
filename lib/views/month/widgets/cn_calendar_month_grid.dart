@@ -7,14 +7,11 @@ import 'package:coo_extensions/coo_extensions.dart';
 import 'package:flutter/material.dart';
 
 class CnCalendarMonthGrid extends StatefulWidget {
-  const CnCalendarMonthGrid({
-    super.key,
-    required this.widget,
-    this.calendarEntries = const [],
-  });
+  const CnCalendarMonthGrid({super.key, required this.widget, this.calendarEntries = const [], this.onTimeTapped});
 
   final CnCalendarMonthView widget;
   final List<CnCalendarEntry> calendarEntries;
+  final Function(DateTime)? onTimeTapped;
 
   @override
   State<CnCalendarMonthGrid> createState() => _CnCalendarMonthGridState();
@@ -41,7 +38,10 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
         top: (index / 7).floor() * cellHeight,
         left: (index % 7) * cellWidth,
         child: GestureDetector(
-          onTap: () => widget.widget.onDayTapped?.call(date),
+          onTap: () {
+            widget.widget.onDayTapped?.call(date);
+            widget.onTimeTapped?.call(date); // Add onTimeTapped callback for month view
+          },
           child: SizedBox(
             height: cellHeight,
             width: cellWidth,
@@ -83,9 +83,10 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
         placedEntriesCount[date] = (placedEntriesCount[date] ?? 0) + 1;
       }
 
-      final int highest = allDatesBetween(entry.dateFrom, entry.dateUntil)
-          .map((date) => placedEntriesCount[date] ?? 0)
-          .reduce((value, element) => value > element ? value : element);
+      final int highest = allDatesBetween(
+        entry.dateFrom,
+        entry.dateUntil,
+      ).map((date) => placedEntriesCount[date] ?? 0).reduce((value, element) => value > element ? value : element);
 
       if (highest > 3) {}
 
@@ -114,10 +115,7 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
         double cellHeight = constraints.maxHeight / 6;
         double cellWidth = constraints.maxWidth / 7;
         return Stack(
-          children: [
-            ...build7x6Grid(cellHeight, cellWidth),
-            ...placeEntriesOnGrid(context, cellHeight, cellWidth),
-          ],
+          children: [...build7x6Grid(cellHeight, cellWidth), ...placeEntriesOnGrid(context, cellHeight, cellWidth)],
         );
       },
     );

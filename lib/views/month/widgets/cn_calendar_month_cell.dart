@@ -22,8 +22,9 @@ class CnCalendarMonthCell extends StatelessWidget {
   /// Only show the first three entries in the grid cell and the rest will come in dots
   Widget getFirstThreeEntries() {
     /// Calendarentries are sorted by duration longest to shortest
-    calendarEntries
-        .sort((a, b) => a.dateFrom.difference(a.dateUntil).inDays.compareTo(b.dateFrom.difference(b.dateUntil).inDays));
+    calendarEntries.sort(
+      (a, b) => a.dateFrom.difference(a.dateUntil).inDays.compareTo(b.dateFrom.difference(b.dateUntil).inDays),
+    );
 
     return Column(
       children: calendarEntries.take(3).map((entry) {
@@ -68,10 +69,7 @@ class CnCalendarMonthCell extends StatelessWidget {
           child: Container(
             width: 10,
             height: 10,
-            decoration: BoxDecoration(
-              color: entry.color,
-              shape: BoxShape.circle,
-            ),
+            decoration: BoxDecoration(color: entry.color, shape: BoxShape.circle),
           ),
         );
       }).toList(),
@@ -96,22 +94,10 @@ class CnCalendarMonthCell extends StatelessWidget {
     return BoxDecoration(
       color: cellColor,
       border: Border(
-        top: BorderSide(
-          color: hideTopBorder ? Colors.transparent : borderColor,
-          width: 0.2,
-        ),
-        left: BorderSide(
-          color: borderColor,
-          width: 0.2,
-        ),
-        right: BorderSide(
-          color: borderColor,
-          width: 0.2,
-        ),
-        bottom: BorderSide(
-          color: borderColor,
-          width: 0.2,
-        ),
+        top: BorderSide(color: hideTopBorder ? Colors.transparent : borderColor, width: 0.2),
+        left: BorderSide(color: borderColor, width: 0.2),
+        right: BorderSide(color: borderColor, width: 0.2),
+        bottom: BorderSide(color: borderColor, width: 0.2),
       ),
     );
   }
@@ -139,8 +125,8 @@ class CnCalendarMonthCell extends StatelessWidget {
               color: date.isSameDate(DateTime.now())
                   ? Colors.white
                   : date.month == selectedMonth.month
-                      ? Colors.black
-                      : Colors.grey,
+                  ? Colors.black
+                  : Colors.grey,
             ),
           ),
         ),

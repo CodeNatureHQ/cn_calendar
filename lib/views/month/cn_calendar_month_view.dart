@@ -12,6 +12,7 @@ class CnCalendarMonthView extends StatefulWidget {
     this.calendarEntries = const [],
     this.onDayTapped,
     this.onDateChanged,
+    this.onTimeTapped,
   });
 
   /// Should always be the first day of the month
@@ -25,6 +26,10 @@ class CnCalendarMonthView extends StatefulWidget {
 
   /// Called whenever the PageView changes the month
   final Function(DateTime date)? onDateChanged;
+
+  /// Called whenever a time slot is tapped
+  /// This is useful for creating new entries at a specific time
+  final Function(DateTime time)? onTimeTapped;
 
   @override
   State<CnCalendarMonthView> createState() => _CnCalendarMonthViewState();
@@ -55,6 +60,7 @@ class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
                 child: CnCalendarMonthGrid(
                   widget: widget,
                   calendarEntries: widget.calendarEntries,
+                  onTimeTapped: widget.onTimeTapped,
                 ),
               ),
             ],

@@ -174,6 +174,7 @@ class _CnCalendarState extends State<CnCalendar> {
             widget.onMonthViewDayTapped?.call(date);
             setState(() {});
           },
+          onTimeTapped: widget.onTimeTapped,
         );
       case CnCalendarView.week:
         return CnCalendarWeekView(
