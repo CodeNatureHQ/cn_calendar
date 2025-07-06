@@ -60,6 +60,7 @@ class CnCalendarWeekView extends StatelessWidget {
               calendarEntries: calendarEntries.where((entry) => !entry.isFullDay).toList(),
               onEntryTapped: onEntryTapped,
               onTimeTapped: onTimeTapped,
+              hourHeight: decoration.weekViewHourHeight,
             ),
           ),
         ],

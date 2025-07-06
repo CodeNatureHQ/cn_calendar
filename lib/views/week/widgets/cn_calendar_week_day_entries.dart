@@ -28,9 +28,7 @@ class CnCalendarWeekDayEntries extends StatelessWidget {
         final width = constraints.maxWidth;
 
         // Funktion zur Gruppierung von überlappenden Einträgen
-        List<List<CnCalendarEntry>> groupOverlappingEntries(
-          List<CnCalendarEntry> entries,
-        ) {
+        List<List<CnCalendarEntry>> groupOverlappingEntries(List<CnCalendarEntry> entries) {
           entries.sort((a, b) => a.dateFrom.compareTo(b.dateFrom)); // Nach Startzeit sortieren
           List<List<CnCalendarEntry>> groups = [];
 
@@ -58,30 +56,19 @@ class CnCalendarWeekDayEntries extends StatelessWidget {
           height: (paintHours + 4) * hourHeight,
           decoration: BoxDecoration(
             color: decoration.backgroundColor,
-            border: Border.symmetric(
-              vertical: BorderSide(
-                color: Colors.grey,
-                width: 0.1,
-              ),
-            ),
+            border: Border.symmetric(vertical: BorderSide(color: Colors.grey, width: 0.1)),
           ),
           child: Stack(
             children: [
               // Stundenlinien
-              ...List.generate(
-                paintHours,
-                (index) {
-                  return Positioned(
-                    top: (index + 1) * hourHeight,
-                    left: 0,
-                    right: 0,
-                    child: Container(
-                      height: 0.1,
-                      color: Colors.grey,
-                    ),
-                  );
-                },
-              ),
+              ...List.generate(paintHours, (index) {
+                return Positioned(
+                  top: (index + 1) * hourHeight,
+                  left: 0,
+                  right: 0,
+                  child: Container(height: 0.1, color: Colors.grey),
+                );
+              }),
 
               // Kalender-Einträge
               ...groupedEntries.expand((group) {
@@ -105,7 +92,14 @@ class CnCalendarWeekDayEntries extends StatelessWidget {
                   }
 
                   final top = startHour * hourHeight + (startMinute / 60) * hourHeight;
-                  final height = (endHour - startHour) * hourHeight + (endMinute - startMinute) / 60 * hourHeight;
+
+                  // Calculate the height of the entry
+                  final calculatedHeight =
+                      (endHour - startHour) * hourHeight + (endMinute - startMinute) / 60 * hourHeight;
+
+                  // Ensure minimum height equivalent to 15 minutes for very short entries
+                  final minHeight = hourHeight / 4; // 15 minutes = 1/4 hour
+                  final height = calculatedHeight < minHeight ? minHeight : calculatedHeight;
 
                   final entryWidth = width / groupSize; // Platz pro Eintrag
                   final left = index * entryWidth;

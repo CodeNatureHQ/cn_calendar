@@ -87,7 +87,11 @@ class CnCalendarDayEntriesList extends StatelessWidget {
       final top = startHour * hourHeight + (startMinute / 60) * hourHeight;
 
       // Calculate the height of the entry
-      final height = (endHour - startHour) * hourHeight + (endMinute - startMinute) / 60 * hourHeight;
+      final calculatedHeight = (endHour - startHour) * hourHeight + (endMinute - startMinute) / 60 * hourHeight;
+
+      // Ensure minimum height equivalent to 10 minutes for very short entries
+      final minHeight = hourHeight / 6; // 10 minutes = 1/6 hour
+      final height = calculatedHeight < minHeight ? minHeight : calculatedHeight;
 
       // Find the column index for this entry
       int columnIndex = 0;

@@ -12,25 +12,28 @@ class CnCalendarWeekGrid extends StatefulWidget {
     required this.calendarEntries,
     this.onEntryTapped,
     this.onTimeTapped,
+    this.hourHeight = 60,
   });
 
   final DateTime selectedWeek;
   final List<CnCalendarEntry> calendarEntries;
   final Function(CnCalendarEntry entry)? onEntryTapped;
   final Function(DateTime time)? onTimeTapped;
+  final double hourHeight;
 
   @override
   State<CnCalendarWeekGrid> createState() => _CnCalendarWeekGridState();
 }
 
 class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTickerProviderStateMixin {
-  double hourHeight = 50;
   double scaleDamping = 0.01; // Further reduce damping for a more responsive scale gesture
+  late double hourHeight; // Local state for hour height
 
   ScrollController _scrollController = ScrollController();
 
   @override
   void initState() {
+    hourHeight = widget.hourHeight; // Initialize with widget's hour height
     _scrollController = ScrollController(initialScrollOffset: DateTime.now().hour * hourHeight);
     super.initState();
   }
@@ -46,13 +49,7 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
     final y = localOffset.dy + scrollOffset;
     final hour = y ~/ hourHeight;
     final minute = ((y % hourHeight) / hourHeight * 60).round();
-    final tappedTime = DateTime(
-      day.year,
-      day.month,
-      day.day,
-      hour,
-      minute,
-    );
+    final tappedTime = DateTime(day.year, day.month, day.day, hour, minute);
     widget.onTimeTapped?.call(tappedTime);
   }
 
@@ -66,7 +63,7 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
 
           // TODO Implement all events that lasts a day and have a start and end time
           GestureDetector(
-            // change height of hourHeight when pinching the screen
+            // change height of widget.hourHeight when pinching the screen
             onScaleUpdate: (details) {
               // Smoother scaling with a more responsive and immediate damping effect
               double adjustedScale = 1 + (details.scale - 1) * scaleDamping;
@@ -78,32 +75,27 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
             child: Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Expanded(
-                  child: CnCalendarWeekTimeline(hourHeight: hourHeight),
-                ),
-                ...List.generate(
-                  7,
-                  (index) {
-                    final selectedDate = widget.selectedWeek.add(Duration(days: index));
-                    // Zeige alle Einträge für den Tag an und diese, die den Tag überlappen
-                    List<CnCalendarEntry> entriesForDay = widget.calendarEntries
-                        .where((entry) => selectedDate.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay))
-                        .toList();
+                Expanded(child: CnCalendarWeekTimeline(hourHeight: hourHeight)),
+                ...List.generate(7, (index) {
+                  final selectedDate = widget.selectedWeek.add(Duration(days: index));
+                  // Zeige alle Einträge für den Tag an und diese, die den Tag überlappen
+                  List<CnCalendarEntry> entriesForDay = widget.calendarEntries
+                      .where((entry) => selectedDate.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay))
+                      .toList();
 
-                    return Expanded(
-                      child: GestureDetector(
-                        behavior: HitTestBehavior.translucent,
-                        onTapDown: (details) => _handleTimeSlotTap(details, selectedDate),
-                        child: CnCalendarWeekDayEntries(
-                          selectedDay: widget.selectedWeek.add(Duration(days: index)),
-                          hourHeight: hourHeight,
-                          calendarEntries: entriesForDay,
-                          onEntryTapped: widget.onEntryTapped,
-                        ),
+                  return Expanded(
+                    child: GestureDetector(
+                      behavior: HitTestBehavior.translucent,
+                      onTapDown: (details) => _handleTimeSlotTap(details, selectedDate),
+                      child: CnCalendarWeekDayEntries(
+                        selectedDay: widget.selectedWeek.add(Duration(days: index)),
+                        hourHeight: hourHeight,
+                        calendarEntries: entriesForDay,
+                        onEntryTapped: widget.onEntryTapped,
                       ),
-                    );
-                  },
-                ),
+                    ),
+                  );
+                }),
               ],
             ),
           ),

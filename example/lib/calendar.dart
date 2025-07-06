@@ -38,6 +38,7 @@ class _CalendarState extends State<Calendar> {
           initialView: CnCalendarView.day,
           decoration: CnDecoration(
             dayViewHourHeight: 90,
+            weekViewHourHeight: 60,
             backgroundColor: Color(0xFFEDEDE9),
             headerBackgroundColor: Color(0xFF119589),
             headerForegroundColor: Color(0xFFEDEDE9),
