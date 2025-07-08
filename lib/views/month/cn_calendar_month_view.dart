@@ -37,8 +37,22 @@ class CnCalendarMonthView extends StatefulWidget {
 
 class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
   final PageController _pageController = PageController(initialPage: 1);
+  late DateTime firstMonthInPageView;
 
-  DateTime firstMonthInPageView = DateTime.now().subtractMonths(1).firstDayOfMonth;
+  @override
+  void initState() {
+    super.initState();
+    firstMonthInPageView = widget.selectedMonth.subtractMonths(1).firstDayOfMonth;
+  }
+
+  @override
+  void didUpdateWidget(CnCalendarMonthView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.selectedMonth.year != widget.selectedMonth.year ||
+        oldWidget.selectedMonth.month != widget.selectedMonth.month) {
+      firstMonthInPageView = widget.selectedMonth.subtractMonths(1).firstDayOfMonth;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,12 +67,19 @@ class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
           widget.onDateChanged?.call(firstMonthInPageView.addMonths(value).firstDayOfMonth);
         },
         itemBuilder: (context, index) {
+          final currentMonth = firstMonthInPageView.addMonths(index);
           return Column(
             children: [
               CnCalendarMonthWeekDays(),
               Expanded(
                 child: CnCalendarMonthGrid(
-                  widget: widget,
+                  widget: CnCalendarMonthView(
+                    selectedMonth: currentMonth,
+                    calendarEntries: widget.calendarEntries,
+                    onDayTapped: widget.onDayTapped,
+                    onDateChanged: widget.onDateChanged,
+                    onTimeTapped: widget.onTimeTapped,
+                  ),
                   calendarEntries: widget.calendarEntries,
                   onTimeTapped: widget.onTimeTapped,
                 ),

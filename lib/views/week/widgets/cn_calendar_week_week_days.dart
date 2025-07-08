@@ -62,10 +62,9 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                               weekdays[weekdayIndex],
                               textAlign: TextAlign.center,
                               style: TextStyle(
-                                color:
-                                    isToday
-                                        ? decoration.weekDaysHeaderSelectedForegroundColor
-                                        : decoration.weekDaysHeaderForegroundColor,
+                                color: isToday
+                                    ? decoration.weekDaysHeaderSelectedForegroundColor
+                                    : decoration.weekDaysHeaderForegroundColor,
                                 fontSize: 12,
                               ),
                             ),
@@ -76,10 +75,9 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
                               style: TextStyle(
                                 fontWeight: FontWeight.bold,
                                 fontSize: 16,
-                                color:
-                                    isToday
-                                        ? decoration.weekDaysHeaderSelectedForegroundColor
-                                        : decoration.weekDaysHeaderForegroundColor,
+                                color: isToday
+                                    ? decoration.weekDaysHeaderSelectedForegroundColor
+                                    : decoration.weekDaysHeaderForegroundColor,
                               ),
                             ),
                             SizedBox(height: 4),

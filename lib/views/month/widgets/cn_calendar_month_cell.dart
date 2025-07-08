@@ -12,67 +12,85 @@ class CnCalendarMonthCell extends StatelessWidget {
     required this.selectedMonth,
     this.calendarEntries = const [],
     this.hideTopBorder = false,
+    this.onDayTapped,
   });
 
   final DateTime date;
   final DateTime selectedMonth;
   final List<CnCalendarEntry> calendarEntries;
   final bool hideTopBorder;
+  final Function(DateTime)? onDayTapped;
 
-  /// Only show the first three entries in the grid cell and the rest will come in dots
-  Widget getFirstThreeEntries() {
-    /// Calendarentries are sorted by duration longest to shortest
-    calendarEntries.sort(
-      (a, b) => a.dateFrom.difference(a.dateUntil).inDays.compareTo(b.dateFrom.difference(b.dateUntil).inDays),
+  /// Get the content for entries with proper overflow handling
+  Widget getEntriesContent() {
+    if (calendarEntries.isEmpty) {
+      return const SizedBox.shrink();
+    }
+
+    // Sort entries by duration (longest first) for better visual hierarchy
+    final sortedEntries = [...calendarEntries];
+    sortedEntries.sort(
+      (a, b) => b.dateUntil.difference(b.dateFrom).inDays.compareTo(a.dateUntil.difference(a.dateFrom).inDays),
     );
 
-    return Column(
-      children: calendarEntries.take(3).map((entry) {
-        return Padding(
-          padding: getPadding(entry),
-          child: CnCalendarMonthEntryCard(entry: entry, date: date, selectedMonth: selectedMonth),
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        const double entryHeight = 16.0;
+        const double entrySpacing = 2.0;
+
+        // Calculate how many entries can fit
+        final availableHeight = constraints.maxHeight;
+        final maxVisibleEntries = ((availableHeight - entrySpacing) / (entryHeight + entrySpacing)).floor() - 1;
+
+        if (maxVisibleEntries <= 0) {
+          return const SizedBox.shrink();
+        }
+
+        // Take only the entries that fit
+        final visibleEntries = sortedEntries.take(maxVisibleEntries).toList();
+        final remainingCount = sortedEntries.length - visibleEntries.length;
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            // Show visible entries
+            ...visibleEntries.map((entry) {
+              return Container(
+                margin: const EdgeInsets.only(bottom: entrySpacing),
+                child: GestureDetector(
+                  onTap: () => onDayTapped?.call(date),
+                  child: Container(
+                    height: entryHeight,
+                    margin: const EdgeInsets.symmetric(horizontal: 2),
+                    child: CnCalendarMonthEntryCard(entry: entry, date: date, selectedMonth: selectedMonth),
+                  ),
+                ),
+              );
+            }),
+
+            // Show "+X more" if there are remaining entries
+            if (remainingCount > 0)
+              GestureDetector(
+                onTap: () => onDayTapped?.call(date),
+                child: Container(
+                  height: entryHeight,
+                  margin: const EdgeInsets.only(bottom: entrySpacing),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.withValues(alpha: 0.3),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: Colors.grey.withValues(alpha: 0.5), width: 0.5),
+                  ),
+                  child: Center(
+                    child: Text(
+                      '+$remainingCount more',
+                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.black54),
+                    ),
+                  ),
+                ),
+              ),
+          ],
         );
-      }).toList(),
-    );
-  }
-
-  /// Padding for the entry card depending on the duration and position during the dates of the entry
-  EdgeInsets getPadding(CnCalendarEntry entry) {
-    final int entryDuration = entry.dateFrom.difference(entry.dateUntil).inDays + 1;
-
-    // if it is the only day of the entry => set padding const EdgeInsets.only(left: 2.0, right: 2.0, bottom: 2.0);
-    if (entryDuration == 1) {
-      return const EdgeInsets.only(left: 2.0, right: 2.0, bottom: 2.0);
-    }
-
-    // if it is the first day of the entry and lasts longer than one day => set padding const EdgeInsets.only(left: 2.0, bottom: 2.0);
-    if (date.isSameDate(entry.dateFrom) && entry.dateFrom.isBefore(entry.dateUntil)) {
-      return const EdgeInsets.only(left: 2.0, bottom: 2.0);
-    }
-    // if it is the last day of the entry and lasts longer than one day => set padding const EdgeInsets.only(right: 2.0, bottom: 2.0);
-
-    if (date.isSameDate(entry.dateUntil) && entry.dateFrom.isBefore(entry.dateUntil)) {
-      return const EdgeInsets.only(right: 2.0, bottom: 2.0);
-    }
-
-    //  if it is betweeen the first and last day of the entry and lasts equal or more than 3 days => set padding const EdgeInsets.only(bottom: 2.0);
-    return const EdgeInsets.only(bottom: 2.0);
-  }
-
-  /// List all entries in dots that cannot be shown in the list
-  Widget getMoreEntries() {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: calendarEntries.skip(3).map((entry) {
-        return Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 2.0),
-          child: Container(
-            width: 10,
-            height: 10,
-            decoration: BoxDecoration(color: entry.color, shape: BoxShape.circle),
-          ),
-        );
-      }).toList(),
+      },
     );
   }
 
@@ -107,29 +125,43 @@ class CnCalendarMonthCell extends StatelessWidget {
     final decoration = CnProvider.of(context).decoration;
     return Container(
       decoration: getBoxDecoration(decoration),
-      child: Align(
-        alignment: Alignment.topCenter,
-        child: Container(
-          padding: const EdgeInsets.all(4),
-          margin: const EdgeInsets.only(top: 4),
-          clipBehavior: Clip.none,
-          decoration: BoxDecoration(
-            color: date.isSameDate(DateTime.now()) ? Colors.black : null,
-            shape: BoxShape.circle,
-          ),
-          child: Text(
-            date.day.toString(),
-            textAlign: TextAlign.center,
-            overflow: TextOverflow.visible,
-            style: TextStyle(
-              color: date.isSameDate(DateTime.now())
-                  ? Colors.white
-                  : date.month == selectedMonth.month
-                  ? Colors.black
-                  : Colors.grey,
+      child: Column(
+        children: [
+          // Day number header
+          Container(
+            height: 28,
+            padding: const EdgeInsets.all(4),
+            child: Center(
+              child: Container(
+                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                decoration: BoxDecoration(
+                  color: date.isSameDate(DateTime.now()) ? Colors.black : null,
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  date.day.toString(),
+                  textAlign: TextAlign.center,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w500,
+                    color: date.isSameDate(DateTime.now())
+                        ? Colors.white
+                        : date.month == selectedMonth.month
+                        ? Colors.black
+                        : Colors.grey,
+                  ),
+                ),
+              ),
             ),
           ),
-        ),
+          // Entries section
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
+              child: getEntriesContent(),
+            ),
+          ),
+        ],
       ),
     );
   }

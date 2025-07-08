@@ -37,7 +37,7 @@ class CnCalendarDayEntryCard extends StatelessWidget {
             ? Padding(
                 padding: padding, // Use dynamic padding based on height
                 child: Align(
-                  alignment: Alignment.centerLeft, // Left align the content
+                  alignment: Alignment.topLeft,
                   child: isLongEvent ? _buildLongEventContent(context) : _buildShortEventContent(context),
                 ),
               )
