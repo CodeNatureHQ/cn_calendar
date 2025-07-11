@@ -64,7 +64,7 @@ class _CalendarState extends State<Calendar> {
             CnCalendarEntry(
               id: '0',
               title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 3)),
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 4)),
               dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
               isFullDay: false,
               color: Colors.purple,
