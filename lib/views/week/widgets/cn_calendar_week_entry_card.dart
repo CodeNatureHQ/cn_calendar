@@ -2,12 +2,7 @@ import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:flutter/material.dart';
 
 class CnCalendarWeekEntryCard extends StatelessWidget {
-  const CnCalendarWeekEntryCard({
-    super.key,
-    required this.entry,
-    this.height = 20,
-    this.onTap,
-  });
+  const CnCalendarWeekEntryCard({super.key, required this.entry, this.height = 20, this.onTap});
 
   final CnCalendarEntry entry;
   final double height;
@@ -22,20 +17,17 @@ class CnCalendarWeekEntryCard extends StatelessWidget {
       child: Container(
         height: height,
         padding: EdgeInsets.all(2),
-        decoration: BoxDecoration(
-          color: entry.color,
-          borderRadius: BorderRadius.circular(8),
-        ),
-        child: Text(
-          entry.title,
-          overflow: TextOverflow.ellipsis,
-          maxLines: 2,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-        ),
+        decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
+        child:
+            entry.content ??
+            Text(
+              entry.title,
+              overflow: TextOverflow.ellipsis,
+              maxLines: 2,
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+            ),
       ),
     );
   }

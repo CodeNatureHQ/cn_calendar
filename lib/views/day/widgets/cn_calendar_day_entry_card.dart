@@ -33,15 +33,17 @@ class CnCalendarDayEntryCard extends StatelessWidget {
             BoxShadow(color: Colors.black.withValues(alpha: 0.25), blurRadius: 4, offset: const Offset(0, 4)),
           ],
         ),
-        child: shouldShowText
-            ? Padding(
-                padding: padding, // Use dynamic padding based on height
-                child: Align(
-                  alignment: Alignment.topLeft,
-                  child: isLongEvent ? _buildLongEventContent(context) : _buildShortEventContent(context),
-                ),
-              )
-            : const SizedBox.shrink(), // No content for very short entries
+        child:
+            entry.content ??
+            (shouldShowText
+                ? Padding(
+                    padding: padding, // Use dynamic padding based on height
+                    child: Align(
+                      alignment: Alignment.topLeft,
+                      child: isLongEvent ? _buildLongEventContent(context) : _buildShortEventContent(context),
+                    ),
+                  )
+                : const SizedBox.shrink()), // No content for very short entries
       ),
     );
   }

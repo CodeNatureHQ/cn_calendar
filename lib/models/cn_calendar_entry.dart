@@ -25,6 +25,9 @@ class CnCalendarEntry {
   /// The Image URL to display in the Entry card
   final String? imageUrl;
 
+  /// If content it passed, it will be displayed in the Entry card instead of the default title and Time
+  final Widget? content;
+
   CnCalendarEntry({
     required this.id,
     required this.title,
@@ -34,5 +37,6 @@ class CnCalendarEntry {
     this.imageUrl,
     this.hasTimeStamp = false,
     this.color = Colors.black,
+    this.content,
   });
 }

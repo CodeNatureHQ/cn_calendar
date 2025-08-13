@@ -198,14 +198,17 @@ class _FullDayEntriesHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: Text(
-                    entry.title,
-                    overflow: TextOverflow.ellipsis,
-                    maxLines: maxLines,
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      fontSize: fontSize,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+                  child: Align(
+                    alignment: Alignment.centerLeft,
+                    child: Text(
+                      entry.title,
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: maxLines,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontSize: fontSize,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
                     ),
                   ),
                 ),
