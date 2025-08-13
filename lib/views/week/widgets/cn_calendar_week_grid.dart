@@ -42,7 +42,7 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
     return widget.calendarEntries.where((entry) => entry.isFullDay).toList();
   }
 
-  void _handleTimeSlotTap(TapDownDetails details, DateTime day) {
+  void _handleTimeSlotTap(TapUpDetails details, DateTime day) {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final localOffset = box.globalToLocal(details.globalPosition);
     final scrollOffset = _scrollController.offset;
@@ -86,7 +86,7 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
                   return Expanded(
                     child: GestureDetector(
                       behavior: HitTestBehavior.translucent,
-                      onTapDown: (details) => _handleTimeSlotTap(details, selectedDate),
+                      onTapUp: (details) => _handleTimeSlotTap(details, selectedDate),
                       child: CnCalendarWeekDayEntries(
                         selectedDay: widget.selectedWeek.add(Duration(days: index)),
                         hourHeight: hourHeight,

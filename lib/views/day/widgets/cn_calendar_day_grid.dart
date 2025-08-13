@@ -69,7 +69,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
     }
   }
 
-  void _handleTimeSlotTap(TapDownDetails details) {
+  void _handleTimeSlotTap(TapUpDetails details) {
     final RenderBox box = context.findRenderObject() as RenderBox;
     final localOffset = box.globalToLocal(details.globalPosition);
     final scrollOffset = _scrollController.offset;
@@ -120,7 +120,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
             SliverToBoxAdapter(
               child: GestureDetector(
                 behavior: HitTestBehavior.opaque,
-                onTapDown: _handleTimeSlotTap,
+                onTapUp: _handleTimeSlotTap,
                 child: Stack(
                   children: [
                     CnCalendarDayTimeline(hourHeight: widget.hourHeight),
