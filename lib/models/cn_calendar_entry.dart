@@ -1,3 +1,4 @@
+import 'package:cn_calendar/models/cn_calendar_entry_type.dart';
 import 'package:flutter/material.dart';
 
 class CnCalendarEntry {
@@ -6,6 +7,9 @@ class CnCalendarEntry {
 
   /// The title of the Entry
   final String title;
+
+  /// The type of the Entry
+  final CnCalendarEntryType type;
 
   /// The date the Entry starts
   final DateTime dateFrom;
@@ -31,6 +35,7 @@ class CnCalendarEntry {
   CnCalendarEntry({
     required this.id,
     required this.title,
+    this.type = CnCalendarEntryType.event,
     required this.dateFrom,
     required this.dateUntil,
     required this.isFullDay,
