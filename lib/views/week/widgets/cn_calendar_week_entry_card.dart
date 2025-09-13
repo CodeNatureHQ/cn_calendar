@@ -18,16 +18,14 @@ class CnCalendarWeekEntryCard extends StatelessWidget {
         height: height,
         padding: EdgeInsets.all(2),
         decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
-        child:
-            entry.content ??
-            Text(
-              entry.title,
-              overflow: TextOverflow.ellipsis,
-              maxLines: 2,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
-            ),
+        child: Text(
+          entry.title,
+          overflow: TextOverflow.ellipsis,
+          maxLines: 2,
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+        ),
       ),
     );
   }
