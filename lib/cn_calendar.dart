@@ -33,6 +33,7 @@ class CnCalendar extends StatefulWidget {
     this.weekViewTitle,
     this.monthViewTitle,
     this.onHeaderTap,
+    this.onLeadingTap,
   });
 
   final DateTime selectedDate;
@@ -81,6 +82,9 @@ class CnCalendar extends StatefulWidget {
 
   /// When tapped on the header, this callback is called
   final VoidCallback? onHeaderTap;
+
+  /// When tapped on the leading header widget, this callback is called
+  final VoidCallback? onLeadingTap;
 
   // Show or hide the views in the selector
   final bool showMonthView;
@@ -216,6 +220,7 @@ class _CnCalendarState extends State<CnCalendar> {
             selectedView: _selectedView,
             leadingWidget: widget.leadingHeaderWidget,
             onHeaderTap: widget.onHeaderTap,
+            onLeadingTap: widget.onLeadingTap,
             selectedDate: _selectedDate,
             onViewChanged: (date, view) {
               _selectedView = view;

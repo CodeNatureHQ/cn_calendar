@@ -16,6 +16,7 @@ class CnCalendarHeader extends StatefulWidget {
     this.onViewChanged,
     this.leadingWidget,
     this.onHeaderTap,
+    this.onLeadingTap,
   });
 
   /// Callback for date changes in the calendar
@@ -36,6 +37,9 @@ class CnCalendarHeader extends StatefulWidget {
 
   /// Callback for header tap
   final VoidCallback? onHeaderTap;
+
+  /// Callback for leading widget tap
+  final VoidCallback? onLeadingTap;
 
   @override
   State<CnCalendarHeader> createState() => _CnCalendarHeaderState();
@@ -64,7 +68,16 @@ class _CnCalendarHeaderState extends State<CnCalendarHeader> {
       decoration: BoxDecoration(color: decoration.headerBackgroundColor),
       child: Row(
         children: [
-          Expanded(flex: 1, child: widget.leadingWidget ?? Container()),
+          Expanded(
+            flex: 1,
+            child: widget.leadingWidget != null
+                ? GestureDetector(
+                    onTap: widget.onLeadingTap,
+                    behavior: HitTestBehavior.opaque,
+                    child: widget.leadingWidget!,
+                  )
+                : SizedBox.shrink(),
+          ),
           SizedBox(width: 16),
           IconButton(
             icon: Icon(Icons.arrow_back_ios, color: decoration.headerForegroundColor),
