@@ -21,14 +21,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
         Expanded(flex: 1, child: SizedBox.shrink()),
         Expanded(
           flex: 7,
-          child: Stack(
-            children: [
-              Column(
-                spacing: 2,
-                children: placeFullDayEvents(),
-              ),
-            ],
-          ),
+          child: Stack(children: [Column(spacing: 2, children: placeFullDayEvents())]),
         ),
       ],
     );
@@ -67,10 +60,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
                   width: entryLength * dayWidth,
                   decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
                   padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                  child: Text(
-                    entry.title,
-                    style: const TextStyle(color: Colors.white),
-                  ),
+                  child: entry.content ?? Text(entry.title, style: const TextStyle(color: Colors.white)),
                 ),
               ),
             ],
