@@ -1,6 +1,6 @@
+import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/provider/cn_provider.dart';
-import 'package:cn_calendar/views/week/widgets/cn_calendar_week_full_days_header.dart';
 import 'package:cn_calendar/views/week/widgets/cn_calendar_week_grid.dart';
 import 'package:cn_calendar/views/week/widgets/cn_calendar_week_week_days.dart';
 import 'package:flutter/material.dart';
@@ -40,31 +40,421 @@ class CnCalendarWeekView extends StatelessWidget {
     final decoration = CnProvider.of(context).decoration;
     return Container(
       color: decoration.backgroundColor,
-      child: Column(
-        children: [
-          CnCalendarWeekWeekDays(
-            selectedWeek: selectedWeek,
-            onDayTapped: onDayTapped,
-            decoration: decoration,
-            entries: calendarEntries,
-          ),
-          CnCalendarWeekFullDaysHeader(
-            selectedWeek: selectedWeek,
-            calendarEntries: calendarEntries.where((entry) => entry.isFullDay).toList(),
-            onEntryTapped: onEntryTapped,
-          ),
-          if (calendarEntries.any((entry) => entry.isFullDay)) const Divider(),
-          Expanded(
-            child: CnCalendarWeekGrid(
-              selectedWeek: selectedWeek,
-              calendarEntries: calendarEntries.where((entry) => !entry.isFullDay).toList(),
-              onEntryTapped: onEntryTapped,
-              onTimeTapped: onTimeTapped,
-              hourHeight: decoration.weekViewHourHeight,
-            ),
-          ),
-        ],
+      child: _WeekViewWithSliverHeader(
+        selectedWeek: selectedWeek,
+        calendarEntries: calendarEntries,
+        onDateChanged: onDateChanged,
+        onEntryTapped: onEntryTapped,
+        onDayTapped: onDayTapped,
+        onTimeTapped: onTimeTapped,
+        decoration: decoration,
       ),
     );
+  }
+}
+
+class _WeekViewWithSliverHeader extends StatefulWidget {
+  const _WeekViewWithSliverHeader({
+    required this.selectedWeek,
+    required this.calendarEntries,
+    required this.decoration,
+    this.onDateChanged,
+    this.onEntryTapped,
+    this.onDayTapped,
+    this.onTimeTapped,
+  });
+
+  final DateTime selectedWeek;
+  final List<CnCalendarEntry> calendarEntries;
+  final Function(DateTime date)? onDateChanged;
+  final Function(CnCalendarEntry entry)? onEntryTapped;
+  final Function(DateTime date)? onDayTapped;
+  final Function(DateTime time)? onTimeTapped;
+  final decoration;
+
+  @override
+  State<_WeekViewWithSliverHeader> createState() => _WeekViewWithSliverHeaderState();
+}
+
+class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
+  ScrollController _scrollController = ScrollController();
+  double _headerShrinkProgress = 0.0;
+
+  @override
+  void initState() {
+    super.initState();
+
+    // Calculate header height based on full day entries
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final headerHeight = _calculateHeaderHeight(fullDayEntries, 0.0);
+
+    double initialOffset;
+    if (DateTime.now().day >= widget.selectedWeek.day && DateTime.now().day < widget.selectedWeek.add(Duration(days: 7)).day) {
+      initialOffset = headerHeight + (DateTime.now().hour * (widget.decoration.weekViewHourHeight - 4));
+    } else {
+      // Default to 8am. Used 7.5 to show the time in the timeline
+      initialOffset = headerHeight + (7.5 * widget.decoration.weekViewHourHeight - 4);
+    }
+
+    _scrollController = ScrollController(initialScrollOffset: initialOffset);
+    _scrollController.addListener(_onScroll);
+  }
+
+  @override
+  void dispose() {
+    _scrollController.removeListener(_onScroll);
+    _scrollController.dispose();
+    super.dispose();
+  }
+
+  void _onScroll() {
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    if (fullDayEntries.isEmpty) return;
+
+    final maxShrink = 50.0; // How much to scroll before fully shrunk
+    final scrollOffset = _scrollController.offset;
+    final progress = (scrollOffset / maxShrink).clamp(0.0, 1.0);
+
+    if (progress != _headerShrinkProgress) {
+      setState(() {
+        _headerShrinkProgress = progress;
+      });
+    }
+  }
+
+  double _calculateHeaderHeight(List<CnCalendarEntry> entries, double shrinkProgress) {
+    if (entries.isEmpty) return 0.0;
+
+    // Calculate the number of rows needed for full day events
+    final eventRows = _calculateEventRows(entries);
+    final rowCount = eventRows.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
+    
+    final rowHeight = 26.0 - (2.0 * shrinkProgress); // From 26 to 24
+    final containerPadding = 8.0 - (4.0 * shrinkProgress); // From 8 to 4
+
+    return (containerPadding * 2) + (rowCount * rowHeight);
+  }
+
+  Map<CnCalendarEntry, int> _calculateEventRows(List<CnCalendarEntry> entries) {
+    final weekStart = widget.selectedWeek.firstDayOfWeek.startOfDay;
+    final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
+
+    // Filter and prepare events
+    final visibleEvents = <Map<String, dynamic>>[];
+
+    for (final entry in entries) {
+      final eventStart = entry.dateFrom.startOfDay;
+      final eventEnd = entry.dateUntil.startOfDay;
+
+      // Clip to week
+      final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
+      final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
+
+      if (!visibleStart.isAfter(visibleEnd)) {
+        final entryStartDay = visibleStart.difference(weekStart).inDays;
+        final entryEndDay = visibleEnd.difference(weekStart).inDays;
+
+        visibleEvents.add({'entry': entry, 'startDay': entryStartDay, 'endDay': entryEndDay});
+      }
+    }
+
+    // Sort events by start day, then by duration (longer events first)
+    visibleEvents.sort((a, b) {
+      final startComparison = (a['startDay'] as int).compareTo(b['startDay'] as int);
+      if (startComparison != 0) return startComparison;
+      final aDuration = (a['endDay'] as int) - (a['startDay'] as int);
+      final bDuration = (b['endDay'] as int) - (b['startDay'] as int);
+      return bDuration.compareTo(aDuration); // Longer events first
+    });
+
+    // Track occupied days for each row
+    final rows = <List<bool>>[];
+    final eventToRow = <CnCalendarEntry, int>{};
+
+    for (final eventData in visibleEvents) {
+      final entry = eventData['entry'] as CnCalendarEntry;
+      final startDay = eventData['startDay'] as int;
+      final endDay = eventData['endDay'] as int;
+
+      // Find the first row where this event fits
+      int targetRow = -1;
+      for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        bool canFit = true;
+        for (int day = startDay; day <= endDay; day++) {
+          if (day < rows[rowIndex].length && rows[rowIndex][day]) {
+            canFit = false;
+            break;
+          }
+        }
+        if (canFit) {
+          targetRow = rowIndex;
+          break;
+        }
+      }
+
+      // If no existing row can fit the event, create a new row
+      if (targetRow == -1) {
+        targetRow = rows.length;
+        rows.add(List.filled(7, false));
+      }
+
+      // Mark the days as occupied in the target row
+      for (int day = startDay; day <= endDay; day++) {
+        if (day < 7) {
+          if (day >= rows[targetRow].length) {
+            rows[targetRow].addAll(List.filled(day - rows[targetRow].length + 1, false));
+          }
+          rows[targetRow][day] = true;
+        }
+      }
+
+      eventToRow[entry] = targetRow;
+    }
+
+    return eventToRow;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final timedEntries = widget.calendarEntries.where((entry) => !entry.isFullDay).toList();
+
+    return Column(
+      children: [
+        CnCalendarWeekWeekDays(
+          selectedWeek: widget.selectedWeek,
+          onDayTapped: widget.onDayTapped,
+          decoration: widget.decoration,
+          entries: widget.calendarEntries,
+        ),
+        Expanded(
+          child: Stack(
+            children: [
+              CustomScrollView(
+                controller: _scrollController,
+                slivers: [
+                  if (fullDayEntries.isNotEmpty) ...[
+                    SliverToBoxAdapter(
+                      child: SizedBox(height: _calculateHeaderHeight(fullDayEntries, _headerShrinkProgress)),
+                    ),
+                    SliverToBoxAdapter(child: Divider(height: 1)),
+                  ],
+                  SliverToBoxAdapter(
+                    child: CnCalendarWeekGrid(
+                      selectedWeek: widget.selectedWeek,
+                      calendarEntries: timedEntries,
+                      onEntryTapped: widget.onEntryTapped,
+                      onTimeTapped: widget.onTimeTapped,
+                      hourHeight: widget.decoration.weekViewHourHeight,
+                    ),
+                  ),
+                ],
+              ),
+              if (fullDayEntries.isNotEmpty)
+                Positioned(
+                  top: 0,
+                  left: 0,
+                  right: 0,
+                  child: _WeekFullDayEntriesHeader(
+                    selectedWeek: widget.selectedWeek,
+                    fullDayEntries: fullDayEntries,
+                    onEntryTapped: widget.onEntryTapped,
+                    shrinkProgress: _headerShrinkProgress,
+                  ),
+                ),
+            ],
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _WeekFullDayEntriesHeader extends StatelessWidget {
+  final DateTime selectedWeek;
+  final List<CnCalendarEntry> fullDayEntries;
+  final Function(CnCalendarEntry entry)? onEntryTapped;
+  final double shrinkProgress;
+
+  const _WeekFullDayEntriesHeader({
+    required this.selectedWeek,
+    required this.fullDayEntries,
+    this.onEntryTapped,
+    this.shrinkProgress = 0.0,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Interpolate values based on shrink progress
+    final rowHeight = 26.0 - (2.0 * shrinkProgress); // From 26 to 24
+    final fontSize = 12.0 - (1.0 * shrinkProgress); // From 12 to 11
+    final borderRadius = 8.0 - (2.0 * shrinkProgress); // From 8 to 6
+    final containerPadding = 8.0 - (4.0 * shrinkProgress); // From 8 to 4
+
+    final eventRows = _calculateEventRows();
+    final rowCount = eventRows.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
+
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: containerPadding, vertical: containerPadding),
+        child: Row(
+          children: [
+            Expanded(flex: 1, child: SizedBox.shrink()),
+            Expanded(
+              flex: 7,
+              child: SizedBox(
+                height: rowCount * rowHeight,
+                child: Stack(children: _buildEventWidgets(eventRows, rowHeight, fontSize, borderRadius)),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Map<CnCalendarEntry, int> _calculateEventRows() {
+    final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
+    final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
+
+    // Filter and prepare events
+    final visibleEvents = <Map<String, dynamic>>[];
+
+    for (final entry in fullDayEntries) {
+      final eventStart = entry.dateFrom.startOfDay;
+      final eventEnd = entry.dateUntil.startOfDay;
+
+      // Clip to week
+      final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
+      final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
+
+      if (!visibleStart.isAfter(visibleEnd)) {
+        final entryStartDay = visibleStart.difference(weekStart).inDays;
+        final entryEndDay = visibleEnd.difference(weekStart).inDays;
+
+        visibleEvents.add({'entry': entry, 'startDay': entryStartDay, 'endDay': entryEndDay});
+      }
+    }
+
+    // Sort events by start day, then by duration (longer events first)
+    visibleEvents.sort((a, b) {
+      final startComparison = (a['startDay'] as int).compareTo(b['startDay'] as int);
+      if (startComparison != 0) return startComparison;
+      final aDuration = (a['endDay'] as int) - (a['startDay'] as int);
+      final bDuration = (b['endDay'] as int) - (b['startDay'] as int);
+      return bDuration.compareTo(aDuration); // Longer events first
+    });
+
+    // Track occupied days for each row
+    final rows = <List<bool>>[];
+    final eventToRow = <CnCalendarEntry, int>{};
+
+    for (final eventData in visibleEvents) {
+      final entry = eventData['entry'] as CnCalendarEntry;
+      final startDay = eventData['startDay'] as int;
+      final endDay = eventData['endDay'] as int;
+
+      // Find the first row where this event fits
+      int targetRow = -1;
+      for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        bool canFit = true;
+        for (int day = startDay; day <= endDay; day++) {
+          if (day < rows[rowIndex].length && rows[rowIndex][day]) {
+            canFit = false;
+            break;
+          }
+        }
+        if (canFit) {
+          targetRow = rowIndex;
+          break;
+        }
+      }
+
+      // If no existing row can fit the event, create a new row
+      if (targetRow == -1) {
+        targetRow = rows.length;
+        rows.add(List.filled(7, false));
+      }
+
+      // Mark the days as occupied in the target row
+      for (int day = startDay; day <= endDay; day++) {
+        if (day < 7) {
+          if (day >= rows[targetRow].length) {
+            rows[targetRow].addAll(List.filled(day - rows[targetRow].length + 1, false));
+          }
+          rows[targetRow][day] = true;
+        }
+      }
+
+      eventToRow[entry] = targetRow;
+    }
+
+    return eventToRow;
+  }
+
+  List<Widget> _buildEventWidgets(Map<CnCalendarEntry, int> eventRows, double rowHeight, double fontSize, double borderRadius) {
+    final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
+    final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
+
+    return [
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final dayWidth = constraints.maxWidth / 7;
+          final eventWidgets = <Widget>[];
+
+          for (final entry in fullDayEntries) {
+            final row = eventRows[entry];
+            if (row == null) continue;
+
+            final eventStart = entry.dateFrom.startOfDay;
+            final eventEnd = entry.dateUntil.startOfDay;
+
+            // Clip to week
+            final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
+            final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
+
+            if (visibleStart.isAfter(visibleEnd)) continue;
+
+            final entryStartDay = visibleStart.difference(weekStart).inDays;
+            final entryLength = visibleEnd.difference(visibleStart).inDays + 1;
+
+            eventWidgets.add(
+              Positioned(
+                top: row * rowHeight,
+                left: entryStartDay * dayWidth,
+                child: GestureDetector(
+                  onTap: () => onEntryTapped?.call(entry),
+                  child: Container(
+                    height: rowHeight - 2, // Small spacing between rows
+                    width: entryLength * dayWidth,
+                    decoration: BoxDecoration(
+                      color: entry.color,
+                      borderRadius: BorderRadius.circular(borderRadius),
+                    ),
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                    child: entry.content ??
+                        Text(
+                          entry.title,
+                          style: TextStyle(
+                            color: Colors.white,
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w500,
+                          ),
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                  ),
+                ),
+              ),
+            );
+          }
+
+          return Stack(children: eventWidgets);
+        },
+      ),
+    ];
   }
 }
