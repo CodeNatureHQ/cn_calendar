@@ -17,7 +17,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final eventRows = _calculateEventRows();
-    final rowCount = eventRows.values.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
+    final rowCount = eventRows.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
 
     return Row(
       children: [
@@ -115,61 +115,56 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
   List<Widget> _buildEventWidgets(Map<CnCalendarEntry, int> eventRows) {
     final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
     final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
-    final widgets = <Widget>[];
 
-    for (final entry in calendarEntries) {
-      final row = eventRows[entry];
-      if (row == null) continue;
+    return [
+      LayoutBuilder(
+        builder: (context, constraints) {
+          final dayWidth = constraints.maxWidth / 7;
+          final eventWidgets = <Widget>[];
 
-      final eventStart = entry.dateFrom.startOfDay;
-      final eventEnd = entry.dateUntil.startOfDay;
+          for (final entry in calendarEntries) {
+            final row = eventRows[entry];
+            if (row == null) continue;
 
-      // Clip to week
-      final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
-      final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
+            final eventStart = entry.dateFrom.startOfDay;
+            final eventEnd = entry.dateUntil.startOfDay;
 
-      if (visibleStart.isAfter(visibleEnd)) continue;
+            // Clip to week
+            final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
+            final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
 
-      final entryStartDay = visibleStart.difference(weekStart).inDays;
-      final entryLength = visibleEnd.difference(visibleStart).inDays + 1;
+            if (visibleStart.isAfter(visibleEnd)) continue;
 
-      widgets.add(
-        Positioned(
-          top: row * 26.0, // 24px height + 2px spacing
-          left: 0,
-          right: 0,
-          child: LayoutBuilder(
-            builder: (context, constraints) {
-              final dayWidth = constraints.maxWidth / 7;
-              return Stack(
-                children: [
-                  Positioned(
-                    left: entryStartDay * dayWidth,
-                    child: GestureDetector(
-                      onTap: () => onEntryTapped?.call(entry),
-                      child: Container(
-                        height: 24,
-                        width: entryLength * dayWidth,
-                        decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
-                        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                        child:
-                            entry.content ??
-                            Text(
-                              entry.title,
-                              style: const TextStyle(color: Colors.white),
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                      ),
-                    ),
+            final entryStartDay = visibleStart.difference(weekStart).inDays;
+            final entryLength = visibleEnd.difference(visibleStart).inDays + 1;
+
+            eventWidgets.add(
+              Positioned(
+                top: row * 26.0, // 24px height + 2px spacing
+                left: entryStartDay * dayWidth,
+                child: GestureDetector(
+                  onTap: () => onEntryTapped?.call(entry),
+                  child: Container(
+                    height: 24,
+                    width: entryLength * dayWidth,
+                    decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
+                    padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                    child:
+                        entry.content ??
+                        Text(
+                          entry.title,
+                          style: const TextStyle(color: Colors.white),
+                          overflow: TextOverflow.ellipsis,
+                        ),
                   ),
-                ],
-              );
-            },
-          ),
-        ),
-      );
-    }
+                ),
+              ),
+            );
+          }
 
-    return widgets;
+          return Stack(children: eventWidgets);
+        },
+      ),
+    ];
   }
 }
