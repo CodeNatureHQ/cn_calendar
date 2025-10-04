@@ -16,22 +16,31 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final eventRows = _calculateEventRows();
+    final rowCount = eventRows.values.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
+
     return Row(
       children: [
         Expanded(flex: 1, child: SizedBox.shrink()),
         Expanded(
           flex: 7,
-          child: Stack(children: [Column(spacing: 2, children: placeFullDayEvents())]),
+          child: SizedBox(
+            height: rowCount * 26.0, // 24px height + 2px spacing
+            child: Stack(children: _buildEventWidgets(eventRows)),
+          ),
         ),
       ],
     );
   }
 
-  List<Widget> placeFullDayEvents() {
+  Map<CnCalendarEntry, int> _calculateEventRows() {
     final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
     final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
 
-    return calendarEntries.map((entry) {
+    // Filter and prepare events
+    final visibleEvents = <Map<String, dynamic>>[];
+
+    for (final entry in calendarEntries) {
       final eventStart = entry.dateFrom.startOfDay;
       final eventEnd = entry.dateUntil.startOfDay;
 
@@ -39,34 +48,128 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
       final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
       final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
 
-      if (visibleStart.isAfter(visibleEnd)) {
-        // Not visible in this week
-        return const SizedBox.shrink();
+      if (!visibleStart.isAfter(visibleEnd)) {
+        final entryStartDay = visibleStart.difference(weekStart).inDays;
+        final entryEndDay = visibleEnd.difference(weekStart).inDays;
+
+        visibleEvents.add({'entry': entry, 'startDay': entryStartDay, 'endDay': entryEndDay});
       }
+    }
+
+    // Sort events by start day, then by duration (longer events first)
+    visibleEvents.sort((a, b) {
+      final startComparison = (a['startDay'] as int).compareTo(b['startDay'] as int);
+      if (startComparison != 0) return startComparison;
+      final aDuration = (a['endDay'] as int) - (a['startDay'] as int);
+      final bDuration = (b['endDay'] as int) - (b['startDay'] as int);
+      return bDuration.compareTo(aDuration); // Longer events first
+    });
+
+    // Track occupied days for each row
+    final rows = <List<bool>>[];
+    final eventToRow = <CnCalendarEntry, int>{};
+
+    for (final eventData in visibleEvents) {
+      final entry = eventData['entry'] as CnCalendarEntry;
+      final startDay = eventData['startDay'] as int;
+      final endDay = eventData['endDay'] as int;
+
+      // Find the first row where this event fits
+      int targetRow = -1;
+      for (int rowIndex = 0; rowIndex < rows.length; rowIndex++) {
+        bool canFit = true;
+        for (int day = startDay; day <= endDay; day++) {
+          if (day < rows[rowIndex].length && rows[rowIndex][day]) {
+            canFit = false;
+            break;
+          }
+        }
+        if (canFit) {
+          targetRow = rowIndex;
+          break;
+        }
+      }
+
+      // If no existing row can fit the event, create a new row
+      if (targetRow == -1) {
+        targetRow = rows.length;
+        rows.add(List.filled(7, false));
+      }
+
+      // Mark the days as occupied in the target row
+      for (int day = startDay; day <= endDay; day++) {
+        if (day < 7) {
+          if (day >= rows[targetRow].length) {
+            rows[targetRow].addAll(List.filled(day - rows[targetRow].length + 1, false));
+          }
+          rows[targetRow][day] = true;
+        }
+      }
+
+      eventToRow[entry] = targetRow;
+    }
+
+    return eventToRow;
+  }
+
+  List<Widget> _buildEventWidgets(Map<CnCalendarEntry, int> eventRows) {
+    final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
+    final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
+    final widgets = <Widget>[];
+
+    for (final entry in calendarEntries) {
+      final row = eventRows[entry];
+      if (row == null) continue;
+
+      final eventStart = entry.dateFrom.startOfDay;
+      final eventEnd = entry.dateUntil.startOfDay;
+
+      // Clip to week
+      final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
+      final visibleEnd = eventEnd.isAfter(weekEnd) ? weekEnd : eventEnd;
+
+      if (visibleStart.isAfter(visibleEnd)) continue;
 
       final entryStartDay = visibleStart.difference(weekStart).inDays;
       final entryLength = visibleEnd.difference(visibleStart).inDays + 1;
 
-      return LayoutBuilder(
-        builder: (context, constraints) {
-          final dayWidth = constraints.maxWidth / 7;
-          return Row(
-            children: [
-              SizedBox(width: entryStartDay * dayWidth),
-              GestureDetector(
-                onTap: () => onEntryTapped?.call(entry),
-                child: Container(
-                  height: 24,
-                  width: entryLength * dayWidth,
-                  decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
-                  padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                  child: entry.content ?? Text(entry.title, style: const TextStyle(color: Colors.white)),
-                ),
-              ),
-            ],
-          );
-        },
+      widgets.add(
+        Positioned(
+          top: row * 26.0, // 24px height + 2px spacing
+          left: 0,
+          right: 0,
+          child: LayoutBuilder(
+            builder: (context, constraints) {
+              final dayWidth = constraints.maxWidth / 7;
+              return Stack(
+                children: [
+                  Positioned(
+                    left: entryStartDay * dayWidth,
+                    child: GestureDetector(
+                      onTap: () => onEntryTapped?.call(entry),
+                      child: Container(
+                        height: 24,
+                        width: entryLength * dayWidth,
+                        decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
+                        padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
+                        child:
+                            entry.content ??
+                            Text(
+                              entry.title,
+                              style: const TextStyle(color: Colors.white),
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            },
+          ),
+        ),
       );
-    }).toList();
+    }
+
+    return widgets;
   }
 }
