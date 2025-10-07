@@ -89,7 +89,8 @@ class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
     final headerHeight = _calculateHeaderHeight(fullDayEntries, 0.0);
 
     double initialOffset;
-    if (DateTime.now().day >= widget.selectedWeek.day && DateTime.now().day < widget.selectedWeek.add(Duration(days: 7)).day) {
+    if (DateTime.now().day >= widget.selectedWeek.day &&
+        DateTime.now().day < widget.selectedWeek.add(Duration(days: 7)).day) {
       initialOffset = headerHeight + (DateTime.now().hour * (widget.decoration.weekViewHourHeight - 4));
     } else {
       // Default to 8am. Used 7.5 to show the time in the timeline
@@ -128,7 +129,7 @@ class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
     // Calculate the number of rows needed for full day events
     final eventRows = _calculateEventRows(entries);
     final rowCount = eventRows.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
-    
+
     final rowHeight = 26.0 - (2.0 * shrinkProgress); // From 26 to 24
     final containerPadding = 8.0 - (4.0 * shrinkProgress); // From 8 to 4
 
@@ -396,7 +397,12 @@ class _WeekFullDayEntriesHeader extends StatelessWidget {
     return eventToRow;
   }
 
-  List<Widget> _buildEventWidgets(Map<CnCalendarEntry, int> eventRows, double rowHeight, double fontSize, double borderRadius) {
+  List<Widget> _buildEventWidgets(
+    Map<CnCalendarEntry, int> eventRows,
+    double rowHeight,
+    double fontSize,
+    double borderRadius,
+  ) {
     final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
     final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
 
@@ -431,19 +437,13 @@ class _WeekFullDayEntriesHeader extends StatelessWidget {
                   child: Container(
                     height: rowHeight - 2, // Small spacing between rows
                     width: entryLength * dayWidth,
-                    decoration: BoxDecoration(
-                      color: entry.color,
-                      borderRadius: BorderRadius.circular(borderRadius),
-                    ),
+                    decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(borderRadius)),
                     padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
-                    child: entry.content ??
+                    child:
+                        entry.content ??
                         Text(
                           entry.title,
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w500,
-                          ),
+                          style: TextStyle(color: Colors.white, fontSize: fontSize, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis,
                         ),
                   ),

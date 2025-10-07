@@ -138,16 +138,29 @@ extension DateExtension on DateTime {
   }
 
   DateTime roundUp({Duration delta = const Duration(minutes: 15)}) {
-    return DateTime.fromMillisecondsSinceEpoch(
-      millisecondsSinceEpoch + delta.inMilliseconds - millisecondsSinceEpoch % delta.inMilliseconds,
-    );
+    final remainder = millisecondsSinceEpoch % delta.inMilliseconds;
+
+    // If already on the mark, return as is
+    if (remainder == 0) {
+      return this;
+    }
+
+    // Round to nearest: if remainder is more than half the delta, round up, otherwise round down
+    if (remainder >= delta.inMilliseconds / 2) {
+      // Round up
+      return DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch + delta.inMilliseconds - remainder);
+    } else {
+      // Round down
+      return DateTime.fromMillisecondsSinceEpoch(millisecondsSinceEpoch - remainder);
+    }
   }
 
   /// Returns true if the given range (rangeStart to rangeEnd) overlaps with the week of this date.
   bool overlapsWithWeek(DateTime rangeStart, DateTime rangeEnd) {
     final weekStart = firstDayOfWeek;
-    final weekEnd = weekStart
-        .add(const Duration(days: 6, hours: 23, minutes: 59, seconds: 59, milliseconds: 999, microseconds: 999));
+    final weekEnd = weekStart.add(
+      const Duration(days: 6, hours: 23, minutes: 59, seconds: 59, milliseconds: 999, microseconds: 999),
+    );
     return rangeStart.isBefore(weekEnd) && rangeEnd.isAfter(weekStart);
   }
 }
