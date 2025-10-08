@@ -2,34 +2,50 @@ import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:flutter/material.dart';
 
-class CnCalendarWeekFullDaysHeader extends StatelessWidget {
-  const CnCalendarWeekFullDaysHeader({
+class WeekFullDayEntriesHeader extends StatelessWidget {
+  final DateTime selectedWeek;
+  final List<CnCalendarEntry> fullDayEntries;
+  final Function(CnCalendarEntry entry)? onEntryTapped;
+  final double shrinkProgress;
+
+  const WeekFullDayEntriesHeader({
     super.key,
     required this.selectedWeek,
-    required this.calendarEntries,
-    required this.onEntryTapped,
+    required this.fullDayEntries,
+    this.onEntryTapped,
+    this.shrinkProgress = 0.0,
   });
-
-  final DateTime selectedWeek;
-  final List<CnCalendarEntry> calendarEntries;
-  final Function(CnCalendarEntry entry)? onEntryTapped;
 
   @override
   Widget build(BuildContext context) {
+    // Interpolate values based on shrink progress
+    final rowHeight = 28.0 - (2.0 * shrinkProgress); // From 28 to 26
+    final fontSize = 12.0 - (1.0 * shrinkProgress); // From 12 to 11
+    final borderRadius = 8.0 - (2.0 * shrinkProgress); // From 8 to 6
+    final containerPadding = 8.0 - (4.0 * shrinkProgress); // From 8 to 4
+
     final eventRows = _calculateEventRows();
     final rowCount = eventRows.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
-
-    return Row(
-      children: [
-        Expanded(flex: 1, child: SizedBox.shrink()),
-        Expanded(
-          flex: 7,
-          child: SizedBox(
-            height: rowCount * 30.0, // 28px height + 2px spacing
-            child: Stack(children: _buildEventWidgets(eventRows)),
-          ),
+    return Container(
+      decoration: BoxDecoration(
+        color: Theme.of(context).scaffoldBackgroundColor,
+        border: Border(bottom: BorderSide(color: Colors.grey.withValues(alpha: 0.2), width: 1)),
+      ),
+      child: Padding(
+        padding: EdgeInsets.symmetric(horizontal: containerPadding, vertical: containerPadding),
+        child: Row(
+          children: [
+            Expanded(flex: 1, child: SizedBox.shrink()),
+            Expanded(
+              flex: 7,
+              child: SizedBox(
+                height: rowCount * rowHeight,
+                child: Stack(children: _buildEventWidgets(eventRows, rowHeight, fontSize, borderRadius)),
+              ),
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -40,7 +56,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
     // Filter and prepare events
     final visibleEvents = <Map<String, dynamic>>[];
 
-    for (final entry in calendarEntries) {
+    for (final entry in fullDayEntries) {
       final eventStart = entry.dateFrom.startOfDay;
       final eventEnd = entry.dateUntil.startOfDay;
 
@@ -112,7 +128,12 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
     return eventToRow;
   }
 
-  List<Widget> _buildEventWidgets(Map<CnCalendarEntry, int> eventRows) {
+  List<Widget> _buildEventWidgets(
+    Map<CnCalendarEntry, int> eventRows,
+    double rowHeight,
+    double fontSize,
+    double borderRadius,
+  ) {
     final weekStart = selectedWeek.firstDayOfWeek.startOfDay;
     final weekEnd = weekStart.add(const Duration(days: 6)).startOfDay;
 
@@ -122,7 +143,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
           final dayWidth = constraints.maxWidth / 7;
           final eventWidgets = <Widget>[];
 
-          for (final entry in calendarEntries) {
+          for (final entry in fullDayEntries) {
             final row = eventRows[entry];
             if (row == null) continue;
 
@@ -140,20 +161,20 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
 
             eventWidgets.add(
               Positioned(
-                top: row * 30.0, // 28px height + 2px spacing
+                top: row * rowHeight,
                 left: entryStartDay * dayWidth,
                 child: GestureDetector(
                   onTap: () => onEntryTapped?.call(entry),
                   child: Container(
-                    height: 28.0,
+                    height: rowHeight - 2, // Small spacing between rows
                     width: entryLength * dayWidth,
-                    decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
+                    decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(borderRadius)),
                     padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
                     child:
                         entry.content ??
                         Text(
                           entry.title,
-                          style: const TextStyle(color: Colors.white),
+                          style: TextStyle(color: Colors.white, fontSize: fontSize, fontWeight: FontWeight.w500),
                           overflow: TextOverflow.ellipsis,
                         ),
                   ),
