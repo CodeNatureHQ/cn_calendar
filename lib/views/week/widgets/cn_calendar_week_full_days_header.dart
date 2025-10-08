@@ -145,7 +145,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
                 child: GestureDetector(
                   onTap: () => onEntryTapped?.call(entry),
                   child: Container(
-                    height: 28,
+                    height: 28.0,
                     width: entryLength * dayWidth,
                     decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
