@@ -25,7 +25,7 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
         Expanded(
           flex: 7,
           child: SizedBox(
-            height: rowCount * 26.0, // 24px height + 2px spacing
+            height: rowCount * 30.0, // 28px height + 2px spacing
             child: Stack(children: _buildEventWidgets(eventRows)),
           ),
         ),
@@ -140,12 +140,12 @@ class CnCalendarWeekFullDaysHeader extends StatelessWidget {
 
             eventWidgets.add(
               Positioned(
-                top: row * 26.0, // 24px height + 2px spacing
+                top: row * 30.0, // 28px height + 2px spacing
                 left: entryStartDay * dayWidth,
                 child: GestureDetector(
                   onTap: () => onEntryTapped?.call(entry),
                   child: Container(
-                    height: 24,
+                    height: 28,
                     width: entryLength * dayWidth,
                     decoration: BoxDecoration(color: entry.color, borderRadius: BorderRadius.circular(8)),
                     padding: const EdgeInsets.symmetric(vertical: 2, horizontal: 8),
