@@ -169,9 +169,9 @@ class _CalendarState extends State<Calendar> {
             // Test entry with exactly 5 minutes - should show text
             CnCalendarEntry(
               id: '0',
-              title: '5 Min Entry',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 9)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 9, minutes: 5)),
+              title: 'Tag der Deutschen Einheit',
+              dateFrom: DateTime.now().startOfDay,
+              dateUntil: DateTime.now().endOfDay.add(Duration(hours: 9, minutes: 5)),
               isFullDay: false,
               color: Colors.amber,
             ),

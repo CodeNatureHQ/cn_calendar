@@ -146,7 +146,8 @@ class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
 
     for (final entry in entries) {
       final eventStart = entry.dateFrom.startOfDay;
-      final eventEnd = entry.dateUntil.startOfDay;
+      // Use effectiveEndDate to handle events that end at midnight - they should not be shown on that day
+      final eventEnd = entry.dateUntil.effectiveEndDate.startOfDay;
 
       // Clip to week
       final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;

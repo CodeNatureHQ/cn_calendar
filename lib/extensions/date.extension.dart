@@ -43,6 +43,21 @@ extension DateExtension on DateTime {
     return TimeOfDay(hour: hour, minute: minute);
   }
 
+  /// Returns true if the DateTime is at exactly midnight (0:00:00.000)
+  bool get isMidnight {
+    return hour == 0 && minute == 0 && second == 0 && millisecond == 0 && microsecond == 0;
+  }
+
+  /// For events that end at midnight, returns the previous day's end.
+  /// Otherwise returns the endOfDay for the current date.
+  /// This is used for display purposes to not show events on the day they end at midnight.
+  DateTime get effectiveEndDate {
+    if (isMidnight) {
+      return subtract(Duration(microseconds: 1));
+    }
+    return this;
+  }
+
   /// Indicates whether the DateTime object represents tomorrow's date.
   bool get isTomorrow {
     final tomorrow = DateTime.now().add(const Duration(days: 1));

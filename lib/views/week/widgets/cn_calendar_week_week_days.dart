@@ -41,7 +41,7 @@ class CnCalendarWeekWeekDays extends StatelessWidget {
 
               // Check which entries are for the current date
               final entriesForDate = entries.where(
-                (entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay),
+                (entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.effectiveEndDate.endOfDay),
               );
 
               return Expanded(

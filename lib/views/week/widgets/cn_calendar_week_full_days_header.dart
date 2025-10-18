@@ -58,7 +58,8 @@ class WeekFullDayEntriesHeader extends StatelessWidget {
 
     for (final entry in fullDayEntries) {
       final eventStart = entry.dateFrom.startOfDay;
-      final eventEnd = entry.dateUntil.startOfDay;
+      // Use effectiveEndDate to handle events that end at midnight - they should not be shown on that day
+      final eventEnd = entry.dateUntil.effectiveEndDate.startOfDay;
 
       // Clip to week
       final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
@@ -148,7 +149,8 @@ class WeekFullDayEntriesHeader extends StatelessWidget {
             if (row == null) continue;
 
             final eventStart = entry.dateFrom.startOfDay;
-            final eventEnd = entry.dateUntil.startOfDay;
+            // Use effectiveEndDate to handle events that end at midnight - they should not be shown on that day
+            final eventEnd = entry.dateUntil.effectiveEndDate.startOfDay;
 
             // Clip to week
             final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;

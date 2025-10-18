@@ -35,8 +35,9 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
       final DateTime date = DateTime(widget.widget.selectedMonth.year, widget.widget.selectedMonth.month, day);
 
       // Get entries for this specific date
+      // Use effectiveEndDate to handle events that end at midnight
       final dateEntries = widget.calendarEntries
-          .where((entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.endOfDay))
+          .where((entry) => date.isBetween(entry.dateFrom.startOfDay, entry.dateUntil.effectiveEndDate.endOfDay))
           .toList();
 
       return Positioned(
