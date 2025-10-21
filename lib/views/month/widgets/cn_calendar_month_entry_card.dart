@@ -13,61 +13,72 @@ class CnCalendarMonthEntryCard extends StatelessWidget {
     if (date.month != selectedMonth.month) {
       return entry.color.withValues(alpha: 0.7);
     }
-
     return entry.color;
   }
 
   BorderRadius? getBorderRadius() {
-    final int entryDuration = entry.dateUntil.difference(entry.dateFrom).inDays + 1;
-    // if it is the only day of the entry => round all corners
-    if (entryDuration == 1) {
-      return BorderRadius.circular(4);
-    }
-
-    // if it is the first day of the entry and lasts longer than one day => round left corners
-    if (date.isSameDate(entry.dateFrom) && entry.dateFrom.isBefore(entry.dateUntil)) {
-      return BorderRadius.only(topLeft: Radius.circular(4), bottomLeft: Radius.circular(4));
-    }
-
-    // if it is the last day of the entry and lasts longer than one day => round right corners
-    // Use effectiveEndDate to handle events that end at midnight properly
     final effectiveEndDate = entry.dateUntil.effectiveEndDate;
-    if (date.isSameDate(effectiveEndDate) && entry.dateFrom.isBefore(entry.dateUntil)) {
-      return BorderRadius.only(topRight: Radius.circular(4), bottomRight: Radius.circular(4));
+    final isFirstDay = date.isSameDate(entry.dateFrom);
+    final isLastDay = date.isSameDate(effectiveEndDate);
+    final isSingleDay = entry.dateFrom.isSameDate(effectiveEndDate);
+
+    // Single day event - round all corners
+    if (isSingleDay) {
+      return BorderRadius.circular(3);
     }
 
-    // if it is betweeen the first and last day of the entry and lasts equal or more than 3 days => no rounded corners
+    // First day of multi-day event - round left corners
+    if (isFirstDay) {
+      return const BorderRadius.only(topLeft: Radius.circular(3), bottomLeft: Radius.circular(3));
+    }
+
+    // Last day of multi-day event - round right corners
+    if (isLastDay) {
+      return const BorderRadius.only(topRight: Radius.circular(3), bottomRight: Radius.circular(3));
+    }
+
+    // Middle day - no rounded corners
     return null;
   }
 
   bool showText() {
-    final int entryDuration = entry.dateUntil.difference(entry.dateFrom).inDays + 1;
-    return entryDuration == 1 || date.isSameDate(entry.dateFrom) || date.weekday == DateTime.monday;
+    final effectiveEndDate = entry.dateUntil.effectiveEndDate;
+    final isSingleDay = entry.dateFrom.isSameDate(effectiveEndDate);
+
+    // Always show text on single day events
+    if (isSingleDay) return true;
+
+    // Show text on first day of multi-day events
+    if (date.isSameDate(entry.dateFrom)) return true;
+
+    // Show text on Mondays for multi-day events that span into a new week
+    if (date.weekday == DateTime.monday &&
+        entry.dateFrom.isBefore(date) &&
+        (effectiveEndDate.isAfter(date) || effectiveEndDate.isSameDate(date))) {
+      return true;
+    }
+
+    return false;
   }
 
   EdgeInsets getPadding() {
-    final int entryDuration = entry.dateUntil.difference(entry.dateFrom).inDays + 1;
-
-    // For single day events, keep normal padding
-    if (entryDuration == 1) {
-      return const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0);
-    }
-
-    // For multi-day events, use consistent padding since margins handle breathing room
-    // First day: normal left padding, no right padding
-    if (date.isSameDate(entry.dateFrom) && entry.dateFrom.isBefore(entry.dateUntil)) {
-      return const EdgeInsets.only(left: 4.0, top: 2.0, bottom: 2.0, right: 0.0);
-    }
-
-    // Last day: normal right padding, no left padding
-    // Use effectiveEndDate to handle events that end at midnight properly
     final effectiveEndDate = entry.dateUntil.effectiveEndDate;
-    if (date.isSameDate(effectiveEndDate) && entry.dateFrom.isBefore(entry.dateUntil)) {
-      return const EdgeInsets.only(right: 4.0, top: 2.0, bottom: 2.0, left: 0.0);
+    final isSingleDay = entry.dateFrom.isSameDate(effectiveEndDate);
+
+    // Single day event - normal padding
+    if (isSingleDay) {
+      return const EdgeInsets.symmetric(horizontal: 4.0, vertical: 1.0);
     }
 
-    // Middle days: no horizontal padding
-    return const EdgeInsets.symmetric(horizontal: 0.0, vertical: 2.0);
+    // Check if entry continues to previous/next day
+    final continuesFromYesterday = entry.dateFrom.isBefore(date);
+    final continuesToTomorrow = effectiveEndDate.isAfter(date);
+
+    // Calculate horizontal padding based on continuation
+    final double leftPadding = continuesFromYesterday ? 0.0 : 4.0;
+    final double rightPadding = continuesToTomorrow ? 0.0 : 4.0;
+
+    return EdgeInsets.only(left: leftPadding, right: rightPadding, top: 1.0, bottom: 1.0);
   }
 
   @override
@@ -84,9 +95,7 @@ class CnCalendarMonthEntryCard extends StatelessWidget {
           showText() ? entry.title : '',
           maxLines: 1,
           overflow: TextOverflow.ellipsis,
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 10),
+          style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 10),
         ),
       ),
     );

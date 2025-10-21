@@ -1,8 +1,8 @@
 import 'package:cn_calendar/extensions/date.extension.dart';
-import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/models/cn_decoration.dart';
 import 'package:cn_calendar/provider/cn_provider.dart';
 import 'package:cn_calendar/views/month/widgets/cn_calendar_month_entry_card.dart';
+import 'package:cn_calendar/views/month/widgets/cn_calendar_month_event_layout.dart';
 import 'package:flutter/material.dart';
 
 class CnCalendarMonthCell extends StatelessWidget {
@@ -10,132 +10,93 @@ class CnCalendarMonthCell extends StatelessWidget {
     super.key,
     required this.date,
     required this.selectedMonth,
-    this.calendarEntries = const [],
+    this.positionedEvents = const [],
+    this.overflowCount = 0,
     this.hideTopBorder = false,
     this.onDayTapped,
-    this.eventPositions = const {},
   });
 
   final DateTime date;
   final DateTime selectedMonth;
-  final List<CnCalendarEntry> calendarEntries;
+  final List<PositionedMonthEvent> positionedEvents;
+  final int overflowCount;
   final bool hideTopBorder;
   final Function(DateTime)? onDayTapped;
-  final Map<String, int> eventPositions;
 
-  /// Get the content for entries with proper overflow handling
-  Widget getEntriesContent() {
-    if (calendarEntries.isEmpty) {
+  /// Build the event rows with proper positioning
+  Widget _buildEventRows() {
+    if (positionedEvents.isEmpty && overflowCount == 0) {
       return const SizedBox.shrink();
     }
 
-    // Sort entries using pre-assigned positions for multi-day events
-    final sortedEntries = [...calendarEntries];
-    sortedEntries.sort((a, b) {
-      final aIsMultiDay = a.dateUntil.difference(a.dateFrom).inDays > 0;
-      final bIsMultiDay = b.dateUntil.difference(b.dateFrom).inDays > 0;
-
-      // Both are multi-day: use pre-assigned positions
-      if (aIsMultiDay && bIsMultiDay) {
-        final aPosition = eventPositions[a.id] ?? 999;
-        final bPosition = eventPositions[b.id] ?? 999;
-        return aPosition.compareTo(bPosition);
-      }
-
-      // One multi-day, one single-day: multi-day comes first
-      if (aIsMultiDay && !bIsMultiDay) return -1;
-      if (!aIsMultiDay && bIsMultiDay) return 1;
-
-      // Both single-day: sort by duration (longest first), then by start time
-      final durationComparison = b.dateUntil
-          .difference(b.dateFrom)
-          .inDays
-          .compareTo(a.dateUntil.difference(a.dateFrom).inDays);
-      if (durationComparison != 0) return durationComparison;
-
-      return a.dateFrom.compareTo(b.dateFrom);
-    });
+    const double eventHeight = 18.0;
+    const double eventSpacing = 2.0;
+    const int maxVisibleRows = 3;
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        const double entryHeight = 16.0;
-        const double entrySpacing = 2.0;
-
-        // Calculate how many entries can fit
-        final availableHeight = constraints.maxHeight;
-        final maxVisibleEntries = ((availableHeight - entrySpacing) / (entryHeight + entrySpacing)).floor() - 1;
-
-        if (maxVisibleEntries <= 0) {
-          return const SizedBox.shrink();
+        // Group events by row
+        final eventsByRow = <int, PositionedMonthEvent>{};
+        for (final event in positionedEvents) {
+          if (event.row < maxVisibleRows) {
+            eventsByRow[event.row] = event;
+          }
         }
 
-        // Take only the entries that fit
-        final visibleEntries = sortedEntries.take(maxVisibleEntries).toList();
-        final remainingCount = sortedEntries.length - visibleEntries.length;
+        // Build rows
+        final children = <Widget>[];
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // Show visible entries
-            ...visibleEntries.map((entry) {
-              // Calculate horizontal margin based on entry duration and position
-              final entryDuration = entry.dateUntil.difference(entry.dateFrom).inDays + 1;
-              final isMultiDay = entryDuration > 1;
+        // Find the maximum row number we have
+        final maxRow = eventsByRow.keys.isEmpty ? 0 : eventsByRow.keys.reduce((a, b) => a > b ? a : b);
 
-              double leftMargin = 0.0;
-              double rightMargin = 0.0;
+        // Build each row
+        for (int row = 0; row <= maxRow && row < maxVisibleRows; row++) {
+          final positioned = eventsByRow[row];
 
-              if (isMultiDay) {
-                // For multi-day events, add small margins only at start and end
-                final effectiveEndDate = entry.dateUntil.effectiveEndDate;
-                final isFirstDay = date.isSameDate(entry.dateFrom);
-                final isLastDay = date.isSameDate(effectiveEndDate);
-
-                if (isFirstDay) {
-                  leftMargin = 1.0; // Small breathing room at start
-                }
-                if (isLastDay) {
-                  rightMargin = 1.0; // Small breathing room at end
-                }
-              } else {
-                // Single day events keep normal margins
-                leftMargin = 2.0;
-                rightMargin = 2.0;
-              }
-
-              return Container(
-                margin: EdgeInsets.only(bottom: entrySpacing, left: leftMargin, right: rightMargin),
-                child: GestureDetector(
-                  onTap: () => onDayTapped?.call(date),
-                  child: SizedBox(
-                    height: entryHeight,
-                    child: CnCalendarMonthEntryCard(entry: entry, date: date, selectedMonth: selectedMonth),
-                  ),
+          if (positioned != null) {
+            children.add(
+              Padding(
+                padding: EdgeInsets.only(bottom: eventSpacing),
+                child: SizedBox(
+                  height: eventHeight,
+                  child: CnCalendarMonthEntryCard(entry: positioned.entry, date: date, selectedMonth: selectedMonth),
                 ),
-              );
-            }),
+              ),
+            );
+          } else {
+            // Empty row - add spacer to maintain layout
+            children.add(SizedBox(height: eventHeight + eventSpacing));
+          }
+        }
 
-            // Show "+X more" if there are remaining entries
-            if (remainingCount > 0)
-              GestureDetector(
-                onTap: () => onDayTapped?.call(date),
-                child: Container(
-                  height: entryHeight,
-                  margin: const EdgeInsets.only(bottom: entrySpacing, left: 2.0, right: 2.0),
-                  decoration: BoxDecoration(
-                    color: Colors.grey.withValues(alpha: 0.3),
-                    borderRadius: BorderRadius.circular(4),
-                    border: Border.all(color: Colors.grey.withValues(alpha: 0.5), width: 0.5),
-                  ),
-                  child: Center(
-                    child: Text(
-                      '+$remainingCount weitere',
-                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.black54),
-                    ),
+        // Add "+X more" indicator if there are overflow events
+        if (overflowCount > 0) {
+          children.add(
+            GestureDetector(
+              onTap: () => onDayTapped?.call(date),
+              child: Container(
+                height: eventHeight,
+                margin: EdgeInsets.only(bottom: eventSpacing),
+                decoration: BoxDecoration(
+                  color: Colors.grey.withValues(alpha: 0.2),
+                  borderRadius: BorderRadius.circular(2),
+                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 0.5),
+                ),
+                child: Center(
+                  child: Text(
+                    '+$overflowCount more',
+                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: Colors.grey.shade700),
                   ),
                 ),
               ),
-          ],
+            ),
+          );
+        }
+
+        return Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: children,
         );
       },
     );
@@ -176,8 +137,8 @@ class CnCalendarMonthCell extends StatelessWidget {
         children: [
           // Day number header
           Container(
-            height: 28,
-            padding: const EdgeInsets.all(4),
+            height: 22,
+            padding: const EdgeInsets.all(2),
             child: Center(
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
@@ -189,7 +150,7 @@ class CnCalendarMonthCell extends StatelessWidget {
                   date.day.toString(),
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontSize: 12,
+                    fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: date.isSameDate(DateTime.now())
                         ? Colors.white
@@ -203,7 +164,7 @@ class CnCalendarMonthCell extends StatelessWidget {
           ),
           // Entries section
           Expanded(
-            child: Container(padding: const EdgeInsets.only(top: 2, bottom: 2), child: getEntriesContent()),
+            child: Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: _buildEventRows()),
           ),
         ],
       ),
