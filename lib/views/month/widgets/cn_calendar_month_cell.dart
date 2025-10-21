@@ -34,23 +34,25 @@ class CnCalendarMonthCell extends StatelessWidget {
     sortedEntries.sort((a, b) {
       final aIsMultiDay = a.dateUntil.difference(a.dateFrom).inDays > 0;
       final bIsMultiDay = b.dateUntil.difference(b.dateFrom).inDays > 0;
-      
+
       // Both are multi-day: use pre-assigned positions
       if (aIsMultiDay && bIsMultiDay) {
         final aPosition = eventPositions[a.id] ?? 999;
         final bPosition = eventPositions[b.id] ?? 999;
         return aPosition.compareTo(bPosition);
       }
-      
+
       // One multi-day, one single-day: multi-day comes first
       if (aIsMultiDay && !bIsMultiDay) return -1;
       if (!aIsMultiDay && bIsMultiDay) return 1;
-      
+
       // Both single-day: sort by duration (longest first), then by start time
-      final durationComparison = b.dateUntil.difference(b.dateFrom).inDays
+      final durationComparison = b.dateUntil
+          .difference(b.dateFrom)
+          .inDays
           .compareTo(a.dateUntil.difference(a.dateFrom).inDays);
       if (durationComparison != 0) return durationComparison;
-      
+
       return a.dateFrom.compareTo(b.dateFrom);
     });
 
@@ -79,16 +81,16 @@ class CnCalendarMonthCell extends StatelessWidget {
               // Calculate horizontal margin based on entry duration and position
               final entryDuration = entry.dateUntil.difference(entry.dateFrom).inDays + 1;
               final isMultiDay = entryDuration > 1;
-              
+
               double leftMargin = 0.0;
               double rightMargin = 0.0;
-              
+
               if (isMultiDay) {
                 // For multi-day events, add small margins only at start and end
                 final effectiveEndDate = entry.dateUntil.effectiveEndDate;
                 final isFirstDay = date.isSameDate(entry.dateFrom);
                 final isLastDay = date.isSameDate(effectiveEndDate);
-                
+
                 if (isFirstDay) {
                   leftMargin = 1.0; // Small breathing room at start
                 }

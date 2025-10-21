@@ -41,20 +41,19 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
 
   void _calculateEventPositions() {
     eventPositions.clear();
-    
+
     // Get all multi-day events
     final multiDayEvents = widget.calendarEntries
         .where((entry) => entry.dateUntil.difference(entry.dateFrom).inDays > 0)
         .toList();
-    
+
     // Sort multi-day events by start date, then by duration (longest first)
     multiDayEvents.sort((a, b) {
       final startComparison = a.dateFrom.compareTo(b.dateFrom);
       if (startComparison != 0) return startComparison;
-      return b.dateUntil.difference(b.dateFrom).inDays
-          .compareTo(a.dateUntil.difference(a.dateFrom).inDays);
+      return b.dateUntil.difference(b.dateFrom).inDays.compareTo(a.dateUntil.difference(a.dateFrom).inDays);
     });
-    
+
     // Assign positions to multi-day events
     int currentPosition = 0;
     for (final event in multiDayEvents) {
