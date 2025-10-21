@@ -53,33 +53,27 @@ class _CalendarState extends State<Calendar> {
             monthViewNotSelectedMonthBackgroundColor: Color(0xFFE1E2E3),
           ),
           calendarEntries: [
-            // Multi-day full-day events for testing order
+            // === EDGE CASE 1: Very long event spanning 3+ weeks ===
             CnCalendarEntry(
               id: '1',
-              title: 'Conference Week',
-              dateFrom: DateTime.now().subtract(Duration(days: 2)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 3)).endOfDay,
+              title: 'Mega Conference',
+              dateFrom: DateTime.now().subtract(Duration(days: 10)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 20)).endOfDay,
               isFullDay: true,
-              color: Colors.blue,
+              color: Colors.deepPurple,
             ),
+
+            // === EDGE CASE 2: Multiple overlapping events of different lengths ===
             CnCalendarEntry(
               id: '2',
-              title: 'Vacation',
-              dateFrom: DateTime.now().add(Duration(days: 5)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 12)).endOfDay,
+              title: 'Long Vacation',
+              dateFrom: DateTime.now().subtract(Duration(days: 2)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 15)).endOfDay,
               isFullDay: true,
               color: Colors.green,
             ),
             CnCalendarEntry(
               id: '3',
-              title: 'Team Training',
-              dateFrom: DateTime.now().add(Duration(days: 1)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 3)).endOfDay,
-              isFullDay: true,
-              color: Colors.orange,
-            ),
-            CnCalendarEntry(
-              id: '4',
               title: 'Project Sprint',
               dateFrom: DateTime.now().subtract(Duration(days: 1)).startOfDay,
               dateUntil: DateTime.now().add(Duration(days: 13)).endOfDay,
@@ -87,182 +81,202 @@ class _CalendarState extends State<Calendar> {
               color: Colors.purple,
             ),
             CnCalendarEntry(
-              id: '5',
-              title: 'Holiday Weekend',
-              dateFrom: DateTime.now().add(Duration(days: 8)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 10)).endOfDay,
+              id: '4',
+              title: 'Conference Week',
+              dateFrom: DateTime.now().startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 6)).endOfDay,
               isFullDay: true,
-              color: Colors.red,
+              color: Colors.blue,
             ),
+            CnCalendarEntry(
+              id: '5',
+              title: 'Team Training',
+              dateFrom: DateTime.now().add(Duration(days: 1)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 3)).endOfDay,
+              isFullDay: true,
+              color: Colors.orange,
+            ),
+
+            // === EDGE CASE 3: Events starting on different weekdays ===
             CnCalendarEntry(
               id: '6',
-              title: 'Workshop Series',
-              dateFrom: DateTime.now().add(Duration(days: 15)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 17)).endOfDay,
-              isFullDay: true,
-              color: Colors.cyan,
-            ),
-            CnCalendarEntry(
-              id: '7',
-              title: 'Business Trip',
-              dateFrom: DateTime.now().add(Duration(days: 20)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 25)).endOfDay,
-              isFullDay: true,
-              color: Colors.amber,
-            ),
-            CnCalendarEntry(
-              id: '8',
-              title: 'Conference Overlap Test',
-              dateFrom: DateTime.now().add(Duration(days: 2)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 4)).endOfDay,
-              isFullDay: true,
-              color: Colors.pink,
-            ),
-            CnCalendarEntry(
-              id: '9',
-              title: 'Single Day Event',
-              dateFrom: DateTime.now().startOfDay,
-              dateUntil: DateTime.now().endOfDay,
+              title: 'Monday Start',
+              dateFrom: DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 1)).startOfDay, // Next Monday
+              dateUntil: DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 5)).endOfDay, // Next Friday
               isFullDay: true,
               color: Colors.teal,
             ),
             CnCalendarEntry(
+              id: '7',
+              title: 'Wednesday Start',
+              dateFrom: DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 3)).startOfDay, // Next Wednesday
+              dateUntil:
+                  DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 10)).endOfDay, // Following Wednesday
+              isFullDay: true,
+              color: Colors.cyan,
+            ),
+            CnCalendarEntry(
+              id: '8',
+              title: 'Friday Start',
+              dateFrom: DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 5)).startOfDay, // Next Friday
+              dateUntil:
+                  DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 9)).endOfDay, // Following Tuesday
+              isFullDay: true,
+              color: Colors.pink,
+            ),
+
+            // === EDGE CASE 4: Weekend-spanning events ===
+            CnCalendarEntry(
+              id: '9',
+              title: 'Weekend Event',
+              dateFrom: DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 6)).startOfDay, // Next Saturday
+              dateUntil: DateTime.now().add(Duration(days: 7 - DateTime.now().weekday + 7)).endOfDay, // Next Sunday
+              isFullDay: true,
+              color: Colors.red,
+            ),
+            CnCalendarEntry(
               id: '10',
-              title: 'Two Day Event',
-              dateFrom: DateTime.now().add(Duration(days: 6)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 7)).endOfDay,
+              title: 'Long Weekend',
+              dateFrom:
+                  DateTime.now().add(Duration(days: 14 - DateTime.now().weekday + 5)).startOfDay, // Friday in 2 weeks
+              dateUntil:
+                  DateTime.now().add(Duration(days: 14 - DateTime.now().weekday + 8)).endOfDay, // Following Monday
+              isFullDay: true,
+              color: Colors.amber,
+            ),
+
+            // === EDGE CASE 5: Single-day events on different days ===
+            CnCalendarEntry(
+              id: '11',
+              title: 'Single Day Today',
+              dateFrom: DateTime.now().startOfDay,
+              dateUntil: DateTime.now().endOfDay,
               isFullDay: true,
               color: Colors.indigo,
             ),
             CnCalendarEntry(
-              id: '0',
-              title: 'Month bug',
-              dateFrom: DateTime.now().endOfDay.subtract(Duration(days: 1)),
-              dateUntil: DateTime.now().endOfDay.add(Duration(days: 2)),
+              id: '12',
+              title: 'Single Day +3',
+              dateFrom: DateTime.now().add(Duration(days: 3)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 3)).endOfDay,
               isFullDay: true,
-              color: Colors.pink,
+              color: Colors.lime,
             ),
             CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 4)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
+              id: '13',
+              title: 'Single Day +7',
+              dateFrom: DateTime.now().add(Duration(days: 7)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 7)).endOfDay,
+              isFullDay: true,
+              color: Colors.brown,
+            ),
+
+            // === EDGE CASE 6: Events with exactly 2 days (minimal multi-day) ===
+            CnCalendarEntry(
+              id: '14',
+              title: 'Two Day Event A',
+              dateFrom: DateTime.now().add(Duration(days: 4)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 5)).endOfDay,
+              isFullDay: true,
+              color: Colors.deepOrange,
+            ),
+            CnCalendarEntry(
+              id: '15',
+              title: 'Two Day Event B',
+              dateFrom: DateTime.now().add(Duration(days: 8)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 9)).endOfDay,
+              isFullDay: true,
+              color: Colors.lightBlue,
+            ),
+
+            // === EDGE CASE 7: Events ending at midnight (effectiveEndDate test) ===
+            CnCalendarEntry(
+              id: '16',
+              title: 'Midnight End Test',
+              dateFrom: DateTime.now().add(Duration(days: 11)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 13)).startOfDay, // Ends at midnight
+              isFullDay: true,
+              color: Colors.yellowAccent,
+            ),
+
+            // === EDGE CASE 8: Multiple events in same row (4+ events) ===
+            CnCalendarEntry(
+              id: '17',
+              title: 'Row Test 1',
+              dateFrom: DateTime.now().add(Duration(days: 16)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 17)).endOfDay,
+              isFullDay: true,
+              color: Colors.blueGrey,
+            ),
+            CnCalendarEntry(
+              id: '18',
+              title: 'Row Test 2',
+              dateFrom: DateTime.now().add(Duration(days: 18)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 19)).endOfDay,
+              isFullDay: true,
+              color: Colors.grey,
+            ),
+            CnCalendarEntry(
+              id: '19',
+              title: 'Row Test 3',
+              dateFrom: DateTime.now().add(Duration(days: 20)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 21)).endOfDay,
+              isFullDay: true,
+              color: Colors.lightGreen,
+            ),
+            CnCalendarEntry(
+              id: '20',
+              title: 'Row Test 4 (Overflow)',
+              dateFrom: DateTime.now().add(Duration(days: 16)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 22)).endOfDay,
+              isFullDay: true,
+              color: Colors.pinkAccent,
+            ),
+
+            // === EDGE CASE 9: Events spanning exactly one week ===
+            CnCalendarEntry(
+              id: '21',
+              title: 'Exactly One Week',
+              dateFrom: DateTime.now().add(Duration(days: 23)).startOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 29)).endOfDay,
+              isFullDay: true,
+              color: Colors.deepOrange,
+            ),
+
+            // === EDGE CASE 10: Past events ===
+            CnCalendarEntry(
+              id: '22',
+              title: 'Past Event',
+              dateFrom: DateTime.now().subtract(Duration(days: 20)).startOfDay,
+              dateUntil: DateTime.now().subtract(Duration(days: 15)).endOfDay,
+              isFullDay: true,
+              color: Colors.grey.shade400,
+            ),
+
+            // Regular timed events for testing
+            CnCalendarEntry(
+              id: 'timed1',
+              title: 'Morning Meeting',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 9)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 10)),
               isFullDay: false,
               color: Colors.purple,
             ),
             CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 3, minutes: 20)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
-              isFullDay: true,
-              color: Colors.red,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(minutes: 30)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 4)),
+              id: 'timed2',
+              title: 'Lunch',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 12)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 13)),
               isFullDay: false,
               color: Colors.blue,
             ),
             CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().subtractDays(4).startOfDay.add(Duration(minutes: 30)),
-              dateUntil: DateTime.now().subtractDays(4).startOfDay.add(Duration(hours: 4)),
+              id: 'timed3',
+              title: 'Afternoon Session',
+              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 14)),
+              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 16)),
               isFullDay: false,
               color: Colors.orange,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().subtractDays(1).startOfDay.add(Duration(minutes: 30)),
-              dateUntil: DateTime.now().subtractDays(1).startOfDay.add(Duration(hours: 4)),
-              isFullDay: false,
-              color: Colors.blue,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().subtractDays(2),
-              dateUntil: DateTime.now().startOfDay,
-              isFullDay: true,
-              color: Colors.orange,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 15)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 30)),
-              isFullDay: false,
-              color: Colors.black,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 00)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 15)),
-              isFullDay: false,
-              color: Colors.black,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 30)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 45)),
-              isFullDay: false,
-              color: Colors.black,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 45)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
-              isFullDay: false,
-              color: Colors.black,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 6, minutes: 50)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 7)),
-              isFullDay: false,
-              color: Colors.black,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Test',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 4, minutes: 30)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 6)),
-              isFullDay: false,
-              color: Colors.green,
-            ),
-            // Test entry with very short duration (3 minutes) - should not show text
-            CnCalendarEntry(
-              id: '0',
-              title: 'Short Entry',
-              dateFrom: DateTime.now().startOfDay.add(Duration(hours: 8)),
-              dateUntil: DateTime.now().startOfDay.add(Duration(hours: 8, minutes: 3)),
-              isFullDay: false,
-              color: Colors.red,
-            ),
-            // Test entry with exactly 5 minutes - should show text
-            CnCalendarEntry(
-              id: '0',
-              title: 'Tag der Deutschen Einheit',
-              dateFrom: DateTime.now().startOfDay,
-              dateUntil: DateTime.now().endOfDay.add(Duration(hours: 9, minutes: 5)),
-              isFullDay: false,
-              color: Colors.amber,
-            ),
-            CnCalendarEntry(
-              id: '0',
-              title: 'Full Daay',
-              dateFrom: DateTime.now().startOfDay.subtract(Duration(hours: 9)),
-              dateUntil: DateTime.now().startOfDay.subtract(Duration(hours: 9, minutes: 5)),
-              isFullDay: true,
-              color: Colors.amber,
             ),
           ],
         ),
