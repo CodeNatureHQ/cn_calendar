@@ -18,6 +18,8 @@ class CnCalendarMonthGrid extends StatefulWidget {
 
 class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
   double height = 0;
+  Map<String, int> eventPositions = {}; // Maps event IDs to their vertical positions
+
   @override
   initState() {
     super.initState();
@@ -26,6 +28,40 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
         height = MediaQuery.sizeOf(context).height - MediaQuery.of(context).viewInsets.vertical;
       });
     });
+    _calculateEventPositions();
+  }
+
+  @override
+  void didUpdateWidget(CnCalendarMonthGrid oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.calendarEntries != widget.calendarEntries) {
+      _calculateEventPositions();
+    }
+  }
+
+  void _calculateEventPositions() {
+    eventPositions.clear();
+    
+    // Get all multi-day events
+    final multiDayEvents = widget.calendarEntries
+        .where((entry) => entry.dateUntil.difference(entry.dateFrom).inDays > 0)
+        .toList();
+    
+    // Sort multi-day events by start date, then by duration (longest first)
+    multiDayEvents.sort((a, b) {
+      final startComparison = a.dateFrom.compareTo(b.dateFrom);
+      if (startComparison != 0) return startComparison;
+      return b.dateUntil.difference(b.dateFrom).inDays
+          .compareTo(a.dateUntil.difference(a.dateFrom).inDays);
+    });
+    
+    // Assign positions to multi-day events
+    int currentPosition = 0;
+    for (final event in multiDayEvents) {
+      if (!eventPositions.containsKey(event.id)) {
+        eventPositions[event.id] = currentPosition++;
+      }
+    }
   }
 
   List<Widget> build7x6Grid(double cellHeight, double cellWidth) {
@@ -46,7 +82,7 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
         child: GestureDetector(
           onTap: () {
             widget.widget.onDayTapped?.call(date);
-            widget.onTimeTapped?.call(date);
+            // Removed onTimeTapped call - this should only be called for specific time slots, not day cells
           },
           child: SizedBox(
             height: cellHeight,
@@ -57,6 +93,7 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
               selectedMonth: widget.widget.selectedMonth,
               calendarEntries: dateEntries,
               onDayTapped: widget.widget.onDayTapped,
+              eventPositions: eventPositions,
             ),
           ),
         ),

@@ -36,22 +36,48 @@ class CnCalendarMonthView extends StatefulWidget {
 }
 
 class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
-  final PageController _pageController = PageController(initialPage: 1);
-  late DateTime firstMonthInPageView;
+  final PageController _pageController = PageController(initialPage: 500);
+  late DateTime baseMonth; // The month that corresponds to page 500
+  int currentPageIndex = 500;
 
   @override
   void initState() {
     super.initState();
-    firstMonthInPageView = widget.selectedMonth.subtractMonths(1).firstDayOfMonth;
+    baseMonth = widget.selectedMonth.firstDayOfMonth;
   }
 
   @override
   void didUpdateWidget(CnCalendarMonthView oldWidget) {
     super.didUpdateWidget(oldWidget);
-    if (oldWidget.selectedMonth.year != widget.selectedMonth.year ||
-        oldWidget.selectedMonth.month != widget.selectedMonth.month) {
-      firstMonthInPageView = widget.selectedMonth.subtractMonths(1).firstDayOfMonth;
+
+    // Only update if the selectedMonth has changed from external source
+    // and it's different from what we're currently displaying
+    final newMonth = widget.selectedMonth.firstDayOfMonth;
+    if (oldWidget.selectedMonth.firstDayOfMonth != newMonth) {
+      // Calculate how many months we need to offset from current base
+      final monthDifference = _calculateMonthDifference(baseMonth, newMonth);
+      final targetPage = 500 + monthDifference;
+
+      // Only animate if we're not already on the correct page
+      if (currentPageIndex != targetPage) {
+        baseMonth = newMonth;
+        currentPageIndex = targetPage;
+
+        WidgetsBinding.instance.addPostFrameCallback((_) {
+          if (mounted && _pageController.hasClients) {
+            _pageController.animateToPage(
+              targetPage,
+              duration: const Duration(milliseconds: 300),
+              curve: Curves.easeInOut,
+            );
+          }
+        });
+      }
     }
+  }
+
+  int _calculateMonthDifference(DateTime from, DateTime to) {
+    return (to.year - from.year) * 12 + (to.month - from.month);
   }
 
   @override
@@ -61,13 +87,19 @@ class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
     return Container(
       color: decoration.backgroundColor,
       child: PageView.builder(
-        itemCount: 3,
         controller: _pageController,
         onPageChanged: (value) {
-          widget.onDateChanged?.call(firstMonthInPageView.addMonths(value).firstDayOfMonth);
+          currentPageIndex = value;
+          // Calculate the month offset from the base month
+          final monthOffset = value - 500;
+          final newMonth = baseMonth.addMonths(monthOffset);
+          widget.onDateChanged?.call(newMonth);
         },
         itemBuilder: (context, index) {
-          final currentMonth = firstMonthInPageView.addMonths(index);
+          // Calculate the month to display based on the page index offset from base month
+          final monthOffset = index - 500;
+          final currentMonth = baseMonth.addMonths(monthOffset);
+
           return Column(
             children: [
               CnCalendarMonthWeekDays(),
@@ -78,10 +110,10 @@ class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
                     calendarEntries: widget.calendarEntries,
                     onDayTapped: widget.onDayTapped,
                     onDateChanged: widget.onDateChanged,
-                    onTimeTapped: widget.onTimeTapped,
+                    // Don't pass onTimeTapped to avoid unwanted calls
                   ),
                   calendarEntries: widget.calendarEntries,
-                  onTimeTapped: widget.onTimeTapped,
+                  // Don't pass onTimeTapped to the grid to prevent unwanted triggering
                 ),
               ),
             ],

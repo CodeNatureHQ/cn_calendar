@@ -13,6 +13,7 @@ class CnCalendarMonthCell extends StatelessWidget {
     this.calendarEntries = const [],
     this.hideTopBorder = false,
     this.onDayTapped,
+    this.eventPositions = const {},
   });
 
   final DateTime date;
@@ -20,6 +21,7 @@ class CnCalendarMonthCell extends StatelessWidget {
   final List<CnCalendarEntry> calendarEntries;
   final bool hideTopBorder;
   final Function(DateTime)? onDayTapped;
+  final Map<String, int> eventPositions;
 
   /// Get the content for entries with proper overflow handling
   Widget getEntriesContent() {
@@ -27,11 +29,30 @@ class CnCalendarMonthCell extends StatelessWidget {
       return const SizedBox.shrink();
     }
 
-    // Sort entries by duration (longest first) for better visual hierarchy
+    // Sort entries using pre-assigned positions for multi-day events
     final sortedEntries = [...calendarEntries];
-    sortedEntries.sort(
-      (a, b) => b.dateUntil.difference(b.dateFrom).inDays.compareTo(a.dateUntil.difference(a.dateFrom).inDays),
-    );
+    sortedEntries.sort((a, b) {
+      final aIsMultiDay = a.dateUntil.difference(a.dateFrom).inDays > 0;
+      final bIsMultiDay = b.dateUntil.difference(b.dateFrom).inDays > 0;
+      
+      // Both are multi-day: use pre-assigned positions
+      if (aIsMultiDay && bIsMultiDay) {
+        final aPosition = eventPositions[a.id] ?? 999;
+        final bPosition = eventPositions[b.id] ?? 999;
+        return aPosition.compareTo(bPosition);
+      }
+      
+      // One multi-day, one single-day: multi-day comes first
+      if (aIsMultiDay && !bIsMultiDay) return -1;
+      if (!aIsMultiDay && bIsMultiDay) return 1;
+      
+      // Both single-day: sort by duration (longest first), then by start time
+      final durationComparison = b.dateUntil.difference(b.dateFrom).inDays
+          .compareTo(a.dateUntil.difference(a.dateFrom).inDays);
+      if (durationComparison != 0) return durationComparison;
+      
+      return a.dateFrom.compareTo(b.dateFrom);
+    });
 
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -55,13 +76,37 @@ class CnCalendarMonthCell extends StatelessWidget {
           children: [
             // Show visible entries
             ...visibleEntries.map((entry) {
+              // Calculate horizontal margin based on entry duration and position
+              final entryDuration = entry.dateUntil.difference(entry.dateFrom).inDays + 1;
+              final isMultiDay = entryDuration > 1;
+              
+              double leftMargin = 0.0;
+              double rightMargin = 0.0;
+              
+              if (isMultiDay) {
+                // For multi-day events, add small margins only at start and end
+                final effectiveEndDate = entry.dateUntil.effectiveEndDate;
+                final isFirstDay = date.isSameDate(entry.dateFrom);
+                final isLastDay = date.isSameDate(effectiveEndDate);
+                
+                if (isFirstDay) {
+                  leftMargin = 1.0; // Small breathing room at start
+                }
+                if (isLastDay) {
+                  rightMargin = 1.0; // Small breathing room at end
+                }
+              } else {
+                // Single day events keep normal margins
+                leftMargin = 2.0;
+                rightMargin = 2.0;
+              }
+
               return Container(
-                margin: const EdgeInsets.only(bottom: entrySpacing),
+                margin: EdgeInsets.only(bottom: entrySpacing, left: leftMargin, right: rightMargin),
                 child: GestureDetector(
                   onTap: () => onDayTapped?.call(date),
-                  child: Container(
+                  child: SizedBox(
                     height: entryHeight,
-                    margin: const EdgeInsets.symmetric(horizontal: 2),
                     child: CnCalendarMonthEntryCard(entry: entry, date: date, selectedMonth: selectedMonth),
                   ),
                 ),
@@ -74,7 +119,7 @@ class CnCalendarMonthCell extends StatelessWidget {
                 onTap: () => onDayTapped?.call(date),
                 child: Container(
                   height: entryHeight,
-                  margin: const EdgeInsets.only(bottom: entrySpacing),
+                  margin: const EdgeInsets.only(bottom: entrySpacing, left: 2.0, right: 2.0),
                   decoration: BoxDecoration(
                     color: Colors.grey.withValues(alpha: 0.3),
                     borderRadius: BorderRadius.circular(4),
@@ -82,7 +127,7 @@ class CnCalendarMonthCell extends StatelessWidget {
                   ),
                   child: Center(
                     child: Text(
-                      '+$remainingCount more',
+                      '+$remainingCount weitere',
                       style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w500, color: Colors.black54),
                     ),
                   ),
@@ -156,10 +201,7 @@ class CnCalendarMonthCell extends StatelessWidget {
           ),
           // Entries section
           Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 2, vertical: 2),
-              child: getEntriesContent(),
-            ),
+            child: Container(padding: const EdgeInsets.only(top: 2, bottom: 2), child: getEntriesContent()),
           ),
         ],
       ),
