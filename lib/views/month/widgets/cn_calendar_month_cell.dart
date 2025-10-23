@@ -127,16 +127,12 @@ class CnCalendarMonthCell extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 3.0, vertical: 1.0),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.2),
-        border: Border(left: BorderSide(color: color, width: 2)),
-        borderRadius: BorderRadius.circular(2),
-      ),
+      decoration: BoxDecoration(color: color, borderRadius: BorderRadius.circular(2)),
       child: Row(
         children: [
           Text(
             '${entry.dateFrom.hour.toString().padLeft(2, '0')}:${entry.dateFrom.minute.toString().padLeft(2, '0')}',
-            style: TextStyle(fontSize: 8, color: Colors.grey.shade300, fontWeight: FontWeight.w500),
+            style: const TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.w500),
           ),
           const SizedBox(width: 3),
           Expanded(
@@ -144,11 +140,7 @@ class CnCalendarMonthCell extends StatelessWidget {
               entry.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: 9,
-                color: isCurrentMonth ? Colors.white : Colors.grey.shade400,
-                fontWeight: FontWeight.w400,
-              ),
+              style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w400),
             ),
           ),
         ],
