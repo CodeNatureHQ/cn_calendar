@@ -166,7 +166,7 @@ class _CalendarState extends State<Calendar> {
               id: '13',
               title: 'Single Day +7',
               dateFrom: DateTime.now().add(Duration(days: 7)).startOfDay,
-              dateUntil: DateTime.now().add(Duration(days: 7)).endOfDay,
+              dateUntil: DateTime.now().add(Duration(days: 7)).startOfDay,
               isFullDay: true,
               color: Colors.brown,
             ),
