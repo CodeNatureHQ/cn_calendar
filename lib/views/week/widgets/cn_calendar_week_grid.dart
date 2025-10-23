@@ -39,7 +39,7 @@ class _CnCalendarWeekGridState extends State<CnCalendarWeekGrid> with SingleTick
   }
 
   List<CnCalendarEntry> getAllFullDayEvents() {
-    return widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    return widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
   }
 
   void _handleTimeSlotTap(TapUpDetails details, DateTime day) {

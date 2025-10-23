@@ -32,7 +32,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
     super.initState();
 
     // Calculate header height based on full day entries
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
     final headerHeight = _calculateHeaderHeight(fullDayEntries, 0.0); // Use expanded height for initial calculation
 
     double initialOffset;
@@ -55,7 +55,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
   }
 
   void _onScroll() {
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
     if (fullDayEntries.isEmpty) return;
 
     final maxShrink = 50.0; // How much to scroll before fully shrunk
@@ -75,7 +75,7 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
     final scrollOffset = _scrollController.offset;
 
     // Account for the header height when calculating the time
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
     final headerHeight = _calculateHeaderHeight(fullDayEntries, _headerShrinkProgress);
 
     final y = localOffset.dy + scrollOffset - headerHeight;
@@ -103,8 +103,8 @@ class _CnCalendarDayGridState extends State<CnCalendarDayGrid> {
 
   @override
   Widget build(BuildContext context) {
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
-    final timedEntries = widget.calendarEntries.where((entry) => !entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
+    final timedEntries = widget.calendarEntries.where((entry) => !entry.shouldDisplayAsFullDay).toList();
 
     return Stack(
       children: [

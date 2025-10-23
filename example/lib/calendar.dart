@@ -253,6 +253,16 @@ class _CalendarState extends State<Calendar> {
               color: Colors.grey.shade400,
             ),
 
+            // === EDGE CASE 11: Multi-day timed event (should display in header) ===
+            CnCalendarEntry(
+              id: '23',
+              title: 'Multi-Day Conference (Timed)',
+              dateFrom: DateTime.now().add(Duration(days: 2)).startOfDay.add(Duration(hours: 9)),
+              dateUntil: DateTime.now().add(Duration(days: 5)).startOfDay.add(Duration(hours: 17)),
+              isFullDay: false, // Not marked as full-day, but spans >24 hours
+              color: Colors.teal,
+            ),
+
             // Regular timed events for testing
             CnCalendarEntry(
               id: 'timed1',

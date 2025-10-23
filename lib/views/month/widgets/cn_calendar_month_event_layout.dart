@@ -27,8 +27,8 @@ class CnCalendarMonthEventLayout {
     // Get the calendar grid dates (42 days: 6 weeks x 7 days)
     final gridDates = _getGridDates(monthStart);
 
-    // Filter and sort full-day events
-    final fullDayEvents = entries.where((e) => e.isFullDay).toList()
+    // Filter and sort full-day events (including multi-day timed events > 24 hours)
+    final fullDayEvents = entries.where((e) => e.shouldDisplayAsFullDay).toList()
       ..sort((a, b) {
         // Sort by duration (longer events first) - this ensures consistent ordering
         final durationA = a.dateUntil.difference(a.dateFrom).inDays;
@@ -182,9 +182,9 @@ class CnCalendarMonthEventLayout {
     required List<CnCalendarEntry> allEntries,
     required Map<DateTime, List<PositionedMonthEvent>> layout,
   }) {
-    // Get all full-day events for this date
+    // Get all full-day events for this date (including multi-day timed events > 24 hours)
     final fullDayEvents = allEntries.where((entry) {
-      if (!entry.isFullDay) return false;
+      if (!entry.shouldDisplayAsFullDay) return false;
       final effectiveEnd = entry.dateUntil.effectiveEndDate;
       final startDay = entry.dateFrom.startOfDay;
       final endDay = effectiveEnd.endOfDay;

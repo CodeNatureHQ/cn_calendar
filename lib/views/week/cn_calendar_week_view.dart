@@ -86,7 +86,7 @@ class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
     super.initState();
 
     // Calculate header height based on full day entries
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
     final headerHeight = _calculateHeaderHeight(fullDayEntries, 0.0);
 
     double initialOffset;
@@ -110,7 +110,7 @@ class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
   }
 
   void _onScroll() {
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
     if (fullDayEntries.isEmpty) return;
 
     final maxShrink = 50.0; // How much to scroll before fully shrunk
@@ -219,8 +219,8 @@ class _WeekViewWithSliverHeaderState extends State<_WeekViewWithSliverHeader> {
 
   @override
   Widget build(BuildContext context) {
-    final fullDayEntries = widget.calendarEntries.where((entry) => entry.isFullDay).toList();
-    final timedEntries = widget.calendarEntries.where((entry) => !entry.isFullDay).toList();
+    final fullDayEntries = widget.calendarEntries.where((entry) => entry.shouldDisplayAsFullDay).toList();
+    final timedEntries = widget.calendarEntries.where((entry) => !entry.shouldDisplayAsFullDay).toList();
 
     return Column(
       children: [

@@ -44,4 +44,16 @@ class CnCalendarEntry {
     this.color = Colors.black,
     this.content,
   });
+
+  /// Returns true if this event should be treated as a full-day event in the header.
+  /// This includes:
+  /// - Events explicitly marked as isFullDay = true
+  /// - Multi-day timed events (duration > 24 hours)
+  bool get shouldDisplayAsFullDay {
+    if (isFullDay) return true;
+
+    // Check if the event spans more than 24 hours
+    final duration = dateUntil.difference(dateFrom);
+    return duration.inHours >= 24;
+  }
 }

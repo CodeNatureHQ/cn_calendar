@@ -55,9 +55,11 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
       // Get positioned events for this date
       final positionedEvents = eventLayout[date] ?? [];
 
-      // Get timed entries for this date (non-full-day events)
+      // Get timed entries for this date (non-full-day events that are not multi-day)
       final timedEntries =
-          widget.calendarEntries.where((entry) => !entry.isFullDay && entry.dateFrom.isSameDate(date)).toList()
+          widget.calendarEntries
+              .where((entry) => !entry.shouldDisplayAsFullDay && entry.dateFrom.isSameDate(date))
+              .toList()
             ..sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
 
       // Calculate overflow count
