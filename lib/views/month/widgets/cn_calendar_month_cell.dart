@@ -27,7 +27,7 @@ class CnCalendarMonthCell extends StatelessWidget {
   final Function(DateTime)? onDayTapped;
 
   /// Build the event rows with proper positioning
-  Widget _buildEventRows() {
+  Widget _buildEventRows(CnDecoration decoration) {
     if (positionedEvents.isEmpty && overflowCount == 0 && timedEntries.isEmpty) {
       return const SizedBox.shrink();
     }
@@ -82,7 +82,7 @@ class CnCalendarMonthCell extends StatelessWidget {
             children.add(
               Padding(
                 padding: EdgeInsets.only(bottom: eventSpacing, left: 2, right: 2),
-                child: SizedBox(height: timedEventHeight, child: _buildTimedEventCard(entry)),
+                child: SizedBox(height: timedEventHeight, child: _buildTimedEventCard(entry, decoration)),
               ),
             );
             itemsShown++;
@@ -104,7 +104,11 @@ class CnCalendarMonthCell extends StatelessWidget {
                 padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                 child: Text(
                   '+$totalOverflow more',
-                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: Colors.grey.shade600),
+                  style: TextStyle(
+                    fontSize: 9,
+                    fontWeight: FontWeight.w500,
+                    color: decoration.monthViewOverflowTextColor,
+                  ),
                 ),
               ),
             ),
@@ -121,7 +125,7 @@ class CnCalendarMonthCell extends StatelessWidget {
   }
 
   /// Build a single timed event card
-  Widget _buildTimedEventCard(CnCalendarEntry entry) {
+  Widget _buildTimedEventCard(CnCalendarEntry entry, CnDecoration decoration) {
     final isCurrentMonth = date.month == selectedMonth.month;
     final color = isCurrentMonth ? entry.color : entry.color.withValues(alpha: 0.7);
 
@@ -132,7 +136,7 @@ class CnCalendarMonthCell extends StatelessWidget {
         children: [
           Text(
             '${entry.dateFrom.hour.toString().padLeft(2, '0')}:${entry.dateFrom.minute.toString().padLeft(2, '0')}',
-            style: const TextStyle(fontSize: 8, color: Colors.white, fontWeight: FontWeight.w500),
+            style: TextStyle(fontSize: 8, color: decoration.monthViewTimedEventTextColor, fontWeight: FontWeight.w500),
           ),
           const SizedBox(width: 3),
           Expanded(
@@ -140,7 +144,11 @@ class CnCalendarMonthCell extends StatelessWidget {
               entry.title,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
-              style: const TextStyle(fontSize: 9, color: Colors.white, fontWeight: FontWeight.w400),
+              style: TextStyle(
+                fontSize: 9,
+                color: decoration.monthViewTimedEventTextColor,
+                fontWeight: FontWeight.w400,
+              ),
             ),
           ),
         ],
@@ -189,7 +197,7 @@ class CnCalendarMonthCell extends StatelessWidget {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                 decoration: BoxDecoration(
-                  color: date.isSameDate(DateTime.now()) ? Colors.black : null,
+                  color: date.isSameDate(DateTime.now()) ? decoration.monthViewTodayBackgroundColor : null,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -199,9 +207,9 @@ class CnCalendarMonthCell extends StatelessWidget {
                     fontSize: 11,
                     fontWeight: FontWeight.w500,
                     color: date.isSameDate(DateTime.now())
-                        ? Colors.white
+                        ? decoration.monthViewTodayForegroundColor
                         : date.month == selectedMonth.month
-                        ? Colors.black
+                        ? decoration.monthViewDayForegroundColor
                         : Colors.grey,
                   ),
                 ),
@@ -210,7 +218,7 @@ class CnCalendarMonthCell extends StatelessWidget {
           ),
           // Entries section
           Expanded(
-            child: Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: _buildEventRows()),
+            child: Padding(padding: const EdgeInsets.symmetric(vertical: 2), child: _buildEventRows(decoration)),
           ),
         ],
       ),

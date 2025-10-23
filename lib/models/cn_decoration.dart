@@ -17,6 +17,10 @@ class CnDecoration {
     this.monthViewNotSelectedMonthBackgroundColor = const Color(0xFFFAFAFE),
     this.monthViewSelectedMonthBorderColor = Colors.grey,
     this.monthViewNotSelectedMonthBorderColor = const Color.fromARGB(255, 185, 180, 180),
+    this.monthViewTodayBackgroundColor = Colors.black,
+    this.monthViewTodayForegroundColor = Colors.white,
+    this.monthViewOverflowTextColor = const Color(0xFF888888),
+    this.monthViewTimedEventTextColor = Colors.white,
     this.entryDotColor = Colors.white,
     this.entryDotColorActiveDay = Colors.black,
     this.weekViewHourHeight = 60.0,
@@ -58,6 +62,10 @@ class CnDecoration {
   final Color monthViewNotSelectedMonthBackgroundColor;
   final Color monthViewSelectedMonthBorderColor;
   final Color monthViewNotSelectedMonthBorderColor;
+  final Color monthViewTodayBackgroundColor;
+  final Color monthViewTodayForegroundColor;
+  final Color monthViewOverflowTextColor;
+  final Color monthViewTimedEventTextColor;
   final Color entryDotColor;
   final Color entryDotColorActiveDay;
   final double weekViewHourHeight;
