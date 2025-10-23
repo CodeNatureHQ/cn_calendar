@@ -17,7 +17,7 @@ class CnCalendarMonthEntryCard extends StatelessWidget {
   }
 
   BorderRadius? getBorderRadius() {
-    final effectiveEndDate = entry.dateUntil.effectiveEndDate;
+    final effectiveEndDate = entry.getEffectiveEndDate();
     final isFirstDay = date.isSameDate(entry.dateFrom);
     final isLastDay = date.isSameDate(effectiveEndDate);
     final isSingleDay = entry.dateFrom.isSameDate(effectiveEndDate);
@@ -42,7 +42,7 @@ class CnCalendarMonthEntryCard extends StatelessWidget {
   }
 
   bool showText() {
-    final effectiveEndDate = entry.dateUntil.effectiveEndDate;
+    final effectiveEndDate = entry.getEffectiveEndDate();
     final isSingleDay = entry.dateFrom.isSameDate(effectiveEndDate);
 
     // Always show text on single day events
@@ -62,7 +62,7 @@ class CnCalendarMonthEntryCard extends StatelessWidget {
   }
 
   EdgeInsets getPadding() {
-    final effectiveEndDate = entry.dateUntil.effectiveEndDate;
+    final effectiveEndDate = entry.getEffectiveEndDate();
     final isSingleDay = entry.dateFrom.isSameDate(effectiveEndDate);
 
     // Single day event - normal padding

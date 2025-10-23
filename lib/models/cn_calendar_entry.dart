@@ -1,3 +1,4 @@
+import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry_type.dart';
 import 'package:flutter/material.dart';
 
@@ -55,5 +56,21 @@ class CnCalendarEntry {
     // Check if the event spans more than 24 hours
     final duration = dateUntil.difference(dateFrom);
     return duration.inHours >= 24;
+  }
+
+  /// Returns the effective end date for the event.
+  /// For full-day events that start and end at midnight on the same day,
+  /// returns the dateUntil as-is to treat them as single-day events.
+  /// Otherwise, uses the effectiveEndDate extension method.
+  DateTime getEffectiveEndDate() {
+    // For full-day events that start and end at midnight on the same day,
+    // we should treat them as single-day events
+    final isSameDayMidnight = dateFrom.isSameDate(dateUntil) && dateFrom.isMidnight && dateUntil.isMidnight;
+
+    if (isSameDayMidnight) {
+      return dateUntil;
+    }
+
+    return dateUntil.effectiveEndDate;
   }
 }

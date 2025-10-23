@@ -131,8 +131,7 @@ class _CnCalendarState extends State<CnCalendar> {
         }).toList();
       case CnCalendarView.day:
         return widget.calendarEntries.where((entry) {
-          // Use effectiveEndDate to handle events that end at midnight - they should not be shown on that day
-          return _selectedDate.isBetween(entry.dateFrom, entry.dateUntil.effectiveEndDate) ||
+          return _selectedDate.isBetween(entry.dateFrom, entry.getEffectiveEndDate()) ||
               _selectedDate.isSameDate(entry.dateFrom);
         }).toList();
     }

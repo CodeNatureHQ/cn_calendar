@@ -90,7 +90,7 @@ class CnCalendarMonthEventLayout {
     // Process each event
     for (final event in events) {
       // Check if this event overlaps with this week
-      final effectiveEnd = event.dateUntil.effectiveEndDate;
+      final effectiveEnd = event.getEffectiveEndDate();
       final eventStart = event.dateFrom.startOfDay;
       final eventEnd = effectiveEnd.endOfDay;
 
@@ -185,7 +185,8 @@ class CnCalendarMonthEventLayout {
     // Get all full-day events for this date (including multi-day timed events > 24 hours)
     final fullDayEvents = allEntries.where((entry) {
       if (!entry.shouldDisplayAsFullDay) return false;
-      final effectiveEnd = entry.dateUntil.effectiveEndDate;
+
+      final effectiveEnd = entry.getEffectiveEndDate();
       final startDay = entry.dateFrom.startOfDay;
       final endDay = effectiveEnd.endOfDay;
       return (date.isAtSameMomentAs(startDay) || date.isAfter(startDay)) &&

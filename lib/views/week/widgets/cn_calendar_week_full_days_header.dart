@@ -26,6 +26,17 @@ class WeekFullDayEntriesHeader extends StatelessWidget {
 
     final eventRows = _calculateEventRows();
     final rowCount = eventRows.isEmpty ? 0 : (eventRows.values.reduce((a, b) => a > b ? a : b) + 1);
+
+    // Debug: Log what we're working with
+    debugPrint(
+      'WeekFullDayEntriesHeader: fullDayEntries=${fullDayEntries.length}, eventRows=${eventRows.length}, rowCount=$rowCount',
+    );
+
+    // Don't render anything if there are no events
+    if (fullDayEntries.isEmpty || rowCount == 0) {
+      return const SizedBox.shrink();
+    }
+
     return Container(
       decoration: BoxDecoration(
         color: Theme.of(context).scaffoldBackgroundColor,
@@ -58,8 +69,7 @@ class WeekFullDayEntriesHeader extends StatelessWidget {
 
     for (final entry in fullDayEntries) {
       final eventStart = entry.dateFrom.startOfDay;
-      // Use effectiveEndDate to handle events that end at midnight - they should not be shown on that day
-      final eventEnd = entry.dateUntil.effectiveEndDate.startOfDay;
+      final eventEnd = entry.getEffectiveEndDate().startOfDay;
 
       // Clip to week
       final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
@@ -149,8 +159,7 @@ class WeekFullDayEntriesHeader extends StatelessWidget {
             if (row == null) continue;
 
             final eventStart = entry.dateFrom.startOfDay;
-            // Use effectiveEndDate to handle events that end at midnight - they should not be shown on that day
-            final eventEnd = entry.dateUntil.effectiveEndDate.startOfDay;
+            final eventEnd = entry.getEffectiveEndDate().startOfDay;
 
             // Clip to week
             final visibleStart = eventStart.isBefore(weekStart) ? weekStart : eventStart;
