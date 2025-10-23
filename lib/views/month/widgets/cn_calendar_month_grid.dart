@@ -1,3 +1,4 @@
+import 'package:cn_calendar/extensions/date.extension.dart';
 import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/views/month/cn_calendar_month_view.dart';
 import 'package:cn_calendar/views/month/widgets/cn_calendar_month_cell.dart';
@@ -54,6 +55,11 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
       // Get positioned events for this date
       final positionedEvents = eventLayout[date] ?? [];
 
+      // Get timed entries for this date (non-full-day events)
+      final timedEntries =
+          widget.calendarEntries.where((entry) => !entry.isFullDay && entry.dateFrom.isSameDate(date)).toList()
+            ..sort((a, b) => a.dateFrom.compareTo(b.dateFrom));
+
       // Calculate overflow count
       final overflowCount = CnCalendarMonthEventLayout.getOverflowCount(
         date: date,
@@ -77,6 +83,7 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
                 date: date,
                 selectedMonth: widget.widget.selectedMonth,
                 positionedEvents: positionedEvents,
+                timedEntries: timedEntries,
                 overflowCount: overflowCount,
                 onDayTapped: widget.widget.onDayTapped,
               ),

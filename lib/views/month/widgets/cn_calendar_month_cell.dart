@@ -1,4 +1,5 @@
 import 'package:cn_calendar/extensions/date.extension.dart';
+import 'package:cn_calendar/models/cn_calendar_entry.dart';
 import 'package:cn_calendar/models/cn_decoration.dart';
 import 'package:cn_calendar/provider/cn_provider.dart';
 import 'package:cn_calendar/views/month/widgets/cn_calendar_month_entry_card.dart';
@@ -11,6 +12,7 @@ class CnCalendarMonthCell extends StatelessWidget {
     required this.date,
     required this.selectedMonth,
     this.positionedEvents = const [],
+    this.timedEntries = const [],
     this.overflowCount = 0,
     this.hideTopBorder = false,
     this.onDayTapped,
@@ -19,38 +21,38 @@ class CnCalendarMonthCell extends StatelessWidget {
   final DateTime date;
   final DateTime selectedMonth;
   final List<PositionedMonthEvent> positionedEvents;
+  final List<CnCalendarEntry> timedEntries;
   final int overflowCount;
   final bool hideTopBorder;
   final Function(DateTime)? onDayTapped;
 
   /// Build the event rows with proper positioning
   Widget _buildEventRows() {
-    if (positionedEvents.isEmpty && overflowCount == 0) {
+    if (positionedEvents.isEmpty && overflowCount == 0 && timedEntries.isEmpty) {
       return const SizedBox.shrink();
     }
 
     const double eventHeight = 18.0;
+    const double timedEventHeight = 14.0;
     const double eventSpacing = 2.0;
-    const int maxVisibleRows = 3;
+    const int maxVisibleItems = 3; // Maximum 3 items total (full-day + timed events)
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Group events by row
+        // Group full-day events by row
         final eventsByRow = <int, PositionedMonthEvent>{};
         for (final event in positionedEvents) {
-          if (event.row < maxVisibleRows) {
-            eventsByRow[event.row] = event;
-          }
+          eventsByRow[event.row] = event;
         }
 
-        // Build rows
         final children = <Widget>[];
+        int itemsShown = 0;
 
         // Find the maximum row number we have
-        final maxRow = eventsByRow.keys.isEmpty ? 0 : eventsByRow.keys.reduce((a, b) => a > b ? a : b);
+        final maxRow = eventsByRow.keys.isEmpty ? -1 : eventsByRow.keys.reduce((a, b) => a > b ? a : b);
 
-        // Build each row
-        for (int row = 0; row <= maxRow && row < maxVisibleRows; row++) {
+        // Build full-day event rows
+        for (int row = 0; row <= maxRow && itemsShown < maxVisibleItems; row++) {
           final positioned = eventsByRow[row];
 
           if (positioned != null) {
@@ -63,30 +65,46 @@ class CnCalendarMonthCell extends StatelessWidget {
                 ),
               ),
             );
+            itemsShown++;
           } else {
             // Empty row - add spacer to maintain layout
             children.add(SizedBox(height: eventHeight + eventSpacing));
+            itemsShown++;
           }
         }
 
-        // Add "+X more" indicator if there are overflow events
-        if (overflowCount > 0) {
+        // Add timed events if we have space
+        final remainingSlots = maxVisibleItems - itemsShown;
+        if (remainingSlots > 0 && timedEntries.isNotEmpty) {
+          final visibleTimedEvents = timedEntries.take(remainingSlots).toList();
+
+          for (final entry in visibleTimedEvents) {
+            children.add(
+              Padding(
+                padding: EdgeInsets.only(bottom: eventSpacing, left: 2, right: 2),
+                child: SizedBox(height: timedEventHeight, child: _buildTimedEventCard(entry)),
+              ),
+            );
+            itemsShown++;
+          }
+        }
+
+        // Calculate total overflow
+        final hiddenFullDayEvents = overflowCount + (maxRow >= maxVisibleItems ? (maxRow - maxVisibleItems + 1) : 0);
+        final hiddenTimedEvents = timedEntries.length - (itemsShown - (maxRow + 1).clamp(0, maxVisibleItems));
+        final totalOverflow = hiddenFullDayEvents + hiddenTimedEvents;
+
+        // Add "+X more" indicator for all hidden events
+        if (totalOverflow > 0) {
           children.add(
             GestureDetector(
               onTap: () => onDayTapped?.call(date),
               child: Container(
-                height: eventHeight,
-                margin: EdgeInsets.only(bottom: eventSpacing),
-                decoration: BoxDecoration(
-                  color: Colors.grey.withValues(alpha: 0.2),
-                  borderRadius: BorderRadius.circular(2),
-                  border: Border.all(color: Colors.grey.withValues(alpha: 0.3), width: 0.5),
-                ),
-                child: Center(
-                  child: Text(
-                    '+$overflowCount more',
-                    style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: Colors.grey.shade700),
-                  ),
+                height: timedEventHeight,
+                padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
+                child: Text(
+                  '+$totalOverflow more',
+                  style: TextStyle(fontSize: 9, fontWeight: FontWeight.w500, color: Colors.grey.shade600),
                 ),
               ),
             ),
@@ -99,6 +117,42 @@ class CnCalendarMonthCell extends StatelessWidget {
           children: children,
         );
       },
+    );
+  }
+
+  /// Build a single timed event card
+  Widget _buildTimedEventCard(CnCalendarEntry entry) {
+    final isCurrentMonth = date.month == selectedMonth.month;
+    final color = isCurrentMonth ? entry.color : entry.color.withValues(alpha: 0.7);
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 3.0, vertical: 1.0),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.2),
+        border: Border(left: BorderSide(color: color, width: 2)),
+        borderRadius: BorderRadius.circular(2),
+      ),
+      child: Row(
+        children: [
+          Text(
+            '${entry.dateFrom.hour.toString().padLeft(2, '0')}:${entry.dateFrom.minute.toString().padLeft(2, '0')}',
+            style: TextStyle(fontSize: 8, color: Colors.grey.shade300, fontWeight: FontWeight.w500),
+          ),
+          const SizedBox(width: 3),
+          Expanded(
+            child: Text(
+              entry.title,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: 9,
+                color: isCurrentMonth ? Colors.white : Colors.grey.shade400,
+                fontWeight: FontWeight.w400,
+              ),
+            ),
+          ),
+        ],
+      ),
     );
   }
 
