@@ -123,12 +123,18 @@ class _CnCalendarState extends State<CnCalendar> {
     switch (_selectedView) {
       case CnCalendarView.month:
         return widget.calendarEntries.where((entry) {
-          // Check if the event overlaps with the selected month
-          final monthStart = _selectedDate.firstDayOfMonth.startOfDay;
-          final monthEnd = _selectedDate.lastDayOfMonth.endOfDay;
+          // Month grid always shows 6 weeks (42 days) in a 7x6 grid
+          // Starting from the Monday of the week containing the 1st of the month
+          final firstDayOfMonth = _selectedDate.firstDayOfMonth;
 
-          // Event overlaps if it starts before month ends AND ends after month starts
-          return entry.dateFrom.isBefore(monthEnd) && entry.dateUntil.isAfter(monthStart);
+          // Get the first Monday that appears in the month view (may be from previous month)
+          final firstVisibleDay = firstDayOfMonth.firstDayOfWeek.startOfDay;
+
+          // Add 6 weeks (42 days) minus 1 microsecond to get the end of the last visible day
+          final lastVisibleDay = firstVisibleDay.add(Duration(days: 42)).subtract(Duration(microseconds: 1));
+
+          // Event overlaps if it starts before the last visible day AND ends after the first visible day
+          return entry.dateFrom.isBefore(lastVisibleDay) && entry.dateUntil.isAfter(firstVisibleDay);
         }).toList();
       case CnCalendarView.week:
         return widget.calendarEntries.where((entry) {
