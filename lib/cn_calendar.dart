@@ -123,7 +123,12 @@ class _CnCalendarState extends State<CnCalendar> {
     switch (_selectedView) {
       case CnCalendarView.month:
         return widget.calendarEntries.where((entry) {
-          return entry.dateFrom.isSameMonth(_selectedDate);
+          // Check if the event overlaps with the selected month
+          final monthStart = _selectedDate.firstDayOfMonth.startOfDay;
+          final monthEnd = _selectedDate.lastDayOfMonth.endOfDay;
+
+          // Event overlaps if it starts before month ends AND ends after month starts
+          return entry.dateFrom.isBefore(monthEnd) && entry.dateUntil.isAfter(monthStart);
         }).toList();
       case CnCalendarView.week:
         return widget.calendarEntries.where((entry) {
@@ -172,7 +177,12 @@ class _CnCalendarState extends State<CnCalendar> {
         return CnCalendarMonthView(
           selectedMonth: date.firstDayOfMonth,
           calendarEntries: getFilteredEntriesForView(),
-          onDateChanged: (date) => widget.onDateChanged(date, CnCalendarView.month),
+          onDateChanged: (date) {
+            setState(() {
+              _selectedDate = date;
+            });
+            widget.onDateChanged(date, CnCalendarView.month);
+          },
           onDayTapped: (date) {
             _selectedView = CnCalendarView.day;
             _selectedDate = date;
@@ -229,6 +239,9 @@ class _CnCalendarState extends State<CnCalendar> {
               setState(() {});
             },
             onDateChanged: (date, view) {
+              setState(() {
+                _selectedDate = date;
+              });
               widget.onDateChanged.call(date, _selectedView);
             },
           ),

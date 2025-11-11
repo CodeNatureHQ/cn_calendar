@@ -103,7 +103,7 @@ class CnCalendarMonthCell extends StatelessWidget {
                 height: timedEventHeight,
                 padding: const EdgeInsets.symmetric(horizontal: 4.0, vertical: 2.0),
                 child: Text(
-                  '+$totalOverflow more',
+                  '+$totalOverflow mehr',
                   style: TextStyle(
                     fontSize: 9,
                     fontWeight: FontWeight.w500,

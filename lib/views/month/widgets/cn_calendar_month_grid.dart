@@ -47,7 +47,9 @@ class _CnCalendarMonthGridState extends State<CnCalendarMonthGrid> {
   List<Widget> _build7x6Grid(double cellHeight, double cellWidth) {
     final cells = <Widget>[];
 
-    for (int index = 0; index < 42; index++) {
+    // Build cells in reverse order so earlier cells are rendered on top
+    // This allows overflow text from earlier days to appear above later days
+    for (int index = 41; index >= 0; index--) {
       final int day =
           index - DateTime(widget.widget.selectedMonth.year, widget.widget.selectedMonth.month, 1).weekday + 2;
       final DateTime date = DateTime(widget.widget.selectedMonth.year, widget.widget.selectedMonth.month, day);

@@ -15,19 +15,16 @@ class CnCalendarMonthWeekDays extends StatelessWidget {
         children: [
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: List.generate(
-              7,
-              (index) {
-                final weekdayIndex = (index + 1) % 7; // Ensures we start from Monday
-                return Expanded(
-                  child: Text(
-                    weekdays[weekdayIndex],
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: Colors.black),
-                  ),
-                );
-              },
-            ),
+            children: List.generate(7, (index) {
+              final weekdayIndex = (index + 1) % 7; // Ensures we start from Monday
+              return Expanded(
+                child: Text(
+                  weekdays[weekdayIndex],
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: Colors.black),
+                ),
+              );
+            }),
           ),
         ],
       ),

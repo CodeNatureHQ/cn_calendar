@@ -36,48 +36,62 @@ class CnCalendarMonthView extends StatefulWidget {
 }
 
 class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
-  final PageController _pageController = PageController(initialPage: 500);
-  late DateTime baseMonth; // The month that corresponds to page 500
-  int currentPageIndex = 500;
+  late DateTime _currentMonth;
+  late PageController _pageController;
+  bool _isInternalUpdate = false;
 
   @override
   void initState() {
     super.initState();
-    baseMonth = widget.selectedMonth.firstDayOfMonth;
+    _currentMonth = widget.selectedMonth.firstDayOfMonth;
+    _pageController = PageController(initialPage: 1);
   }
 
   @override
   void didUpdateWidget(CnCalendarMonthView oldWidget) {
     super.didUpdateWidget(oldWidget);
-
-    // Only update if the selectedMonth has changed from external source
-    // and it's different from what we're currently displaying
     final newMonth = widget.selectedMonth.firstDayOfMonth;
     if (oldWidget.selectedMonth.firstDayOfMonth != newMonth) {
-      // Calculate how many months we need to offset from current base
-      final monthDifference = _calculateMonthDifference(baseMonth, newMonth);
-      final targetPage = 500 + monthDifference;
-
-      // Only animate if we're not already on the correct page
-      if (currentPageIndex != targetPage) {
-        baseMonth = newMonth;
-        currentPageIndex = targetPage;
-
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          if (mounted && _pageController.hasClients) {
-            _pageController.animateToPage(
-              targetPage,
-              duration: const Duration(milliseconds: 300),
-              curve: Curves.easeInOut,
-            );
-          }
-        });
-      }
+      _isInternalUpdate = true;
+      setState(() {
+        _currentMonth = newMonth;
+      });
+      // Jump back to middle page after rebuilding
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted && _pageController.hasClients) {
+          _pageController.jumpToPage(1);
+          _isInternalUpdate = false;
+        }
+      });
     }
   }
 
-  int _calculateMonthDifference(DateTime from, DateTime to) {
-    return (to.year - from.year) * 12 + (to.month - from.month);
+  void _onPageChanged(int index) {
+    if (_isInternalUpdate) return;
+
+    if (index == 0) {
+      // Swiped to previous month
+      final newMonth = _currentMonth.addMonths(-1).firstDayOfMonth;
+      setState(() {
+        _currentMonth = newMonth;
+      });
+      _pageController.jumpToPage(1);
+      widget.onDateChanged?.call(newMonth);
+    } else if (index == 2) {
+      // Swiped to next month
+      final newMonth = _currentMonth.addMonths(1).firstDayOfMonth;
+      setState(() {
+        _currentMonth = newMonth;
+      });
+      _pageController.jumpToPage(1);
+      widget.onDateChanged?.call(newMonth);
+    }
+  }
+
+  @override
+  void dispose() {
+    _pageController.dispose();
+    super.dispose();
   }
 
   @override
@@ -86,40 +100,36 @@ class _CnCalendarMonthViewState extends State<CnCalendarMonthView> {
 
     return Container(
       color: decoration.backgroundColor,
-      child: PageView.builder(
+      child: PageView(
         controller: _pageController,
-        onPageChanged: (value) {
-          currentPageIndex = value;
-          // Calculate the month offset from the base month
-          final monthOffset = value - 500;
-          final newMonth = baseMonth.addMonths(monthOffset);
-          widget.onDateChanged?.call(newMonth);
-        },
-        itemBuilder: (context, index) {
-          // Calculate the month to display based on the page index offset from base month
-          final monthOffset = index - 500;
-          final currentMonth = baseMonth.addMonths(monthOffset);
-
-          return Column(
-            children: [
-              CnCalendarMonthWeekDays(),
-              Expanded(
-                child: CnCalendarMonthGrid(
-                  widget: CnCalendarMonthView(
-                    selectedMonth: currentMonth,
-                    calendarEntries: widget.calendarEntries,
-                    onDayTapped: widget.onDayTapped,
-                    onDateChanged: widget.onDateChanged,
-                    // Don't pass onTimeTapped to avoid unwanted calls
-                  ),
-                  calendarEntries: widget.calendarEntries,
-                  // Don't pass onTimeTapped to the grid to prevent unwanted triggering
-                ),
-              ),
-            ],
-          );
-        },
+        onPageChanged: _onPageChanged,
+        children: [
+          _buildMonthPage(_currentMonth.addMonths(-1)),
+          _buildMonthPage(_currentMonth),
+          _buildMonthPage(_currentMonth.addMonths(1)),
+        ],
       ),
+    );
+  }
+
+  Widget _buildMonthPage(DateTime month) {
+    return Column(
+      children: [
+        CnCalendarMonthWeekDays(),
+        Expanded(
+          child: CnCalendarMonthGrid(
+            widget: CnCalendarMonthView(
+              selectedMonth: month,
+              calendarEntries: widget.calendarEntries,
+              onDayTapped: widget.onDayTapped,
+              onDateChanged: widget.onDateChanged,
+              // Don't pass onTimeTapped to avoid unwanted calls
+            ),
+            calendarEntries: widget.calendarEntries,
+            // Don't pass onTimeTapped to the grid to prevent unwanted triggering
+          ),
+        ),
+      ],
     );
   }
 }

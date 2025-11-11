@@ -83,21 +83,54 @@ class CnCalendarMonthEntryCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      height: double.infinity,
-      clipBehavior: Clip.hardEdge,
-      decoration: BoxDecoration(color: getColor(), borderRadius: getBorderRadius()),
-      padding: getPadding(),
-      child: Align(
-        alignment: Alignment.centerLeft,
-        child: Text(
-          showText() ? entry.title : '',
-          maxLines: 1,
-          overflow: TextOverflow.ellipsis,
-          style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 10),
-        ),
-      ),
+    final effectiveEndDate = entry.getEffectiveEndDate();
+    final isLastDay = date.isSameDate(effectiveEndDate);
+    final continuesToTomorrow = effectiveEndDate.isAfter(date);
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Only allow overflow if the event continues to the next day AND we're not on the last day
+        if (continuesToTomorrow && !isLastDay) {
+          return OverflowBox(
+            alignment: Alignment.centerLeft,
+            maxWidth: double.infinity,
+            minWidth: constraints.maxWidth,
+            child: Container(
+              height: double.infinity,
+              clipBehavior: Clip.none,
+              decoration: BoxDecoration(color: getColor(), borderRadius: getBorderRadius()),
+              padding: getPadding(),
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: Text(
+                  showText() ? entry.title : '',
+                  maxLines: 1,
+                  overflow: TextOverflow.clip,
+                  softWrap: false,
+                  style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 10),
+                ),
+              ),
+            ),
+          );
+        } else {
+          // Event ends today - use ellipsis
+          return Container(
+            height: double.infinity,
+            clipBehavior: Clip.hardEdge,
+            decoration: BoxDecoration(color: getColor(), borderRadius: getBorderRadius()),
+            padding: getPadding(),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                showText() ? entry.title : '',
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(fontWeight: FontWeight.w500, color: Colors.white, fontSize: 10),
+              ),
+            ),
+          );
+        }
+      },
     );
   }
 }
