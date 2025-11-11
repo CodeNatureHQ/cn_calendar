@@ -185,6 +185,8 @@ class CnCalendarMonthCell extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final decoration = CnProvider.of(context).decoration;
+    final isToday = date.isSameDate(DateTime.now());
+
     return Container(
       decoration: getBoxDecoration(decoration),
       child: Column(
@@ -192,27 +194,20 @@ class CnCalendarMonthCell extends StatelessWidget {
           // Day number header
           Container(
             height: 22,
-            padding: const EdgeInsets.all(2),
-            child: Center(
-              child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                decoration: BoxDecoration(
-                  color: date.isSameDate(DateTime.now()) ? decoration.monthViewTodayBackgroundColor : null,
-                  borderRadius: BorderRadius.circular(12),
-                ),
-                child: Text(
-                  date.day.toString(),
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.w500,
-                    color: date.isSameDate(DateTime.now())
-                        ? decoration.monthViewTodayForegroundColor
-                        : date.month == selectedMonth.month
-                        ? decoration.monthViewDayForegroundColor
-                        : Colors.grey,
-                  ),
-                ),
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(horizontal: 4, vertical: 2),
+            decoration: BoxDecoration(color: isToday ? decoration.monthViewTodayBackgroundColor : null),
+            child: Text(
+              date.day.toString(),
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 11,
+                fontWeight: FontWeight.w500,
+                color: isToday
+                    ? decoration.monthViewTodayForegroundColor
+                    : date.month == selectedMonth.month
+                    ? decoration.monthViewDayForegroundColor
+                    : Colors.grey,
               ),
             ),
           ),
