@@ -52,7 +52,7 @@ class _CnCalendarHeaderState extends State<CnCalendarHeader> {
     String title = '';
     switch (widget.selectedView) {
       case CnCalendarView.month:
-        title = DateFormat('MMMM').format(widget.selectedDate);
+        title = DateFormat('MMMM yyyy').format(widget.selectedDate);
         break;
       case CnCalendarView.week:
         title = "${DateFormat('MMMM').format(widget.selectedDate)}, KW ${widget.selectedDate.weekOfYear}";
